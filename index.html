@@ -4,221 +4,133 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#090d17">
-<title>SIDII COIN</title>
+<title>SIDII</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#090d17;color:#f5f7fb;font-family:Arial,sans-serif;text-align:center}
-header{padding:22px 12px 12px;color:#ffd05a;font-size:30px;font-weight:900;letter-spacing:4px}
-.sub,.small{color:#9aa8bd;font-size:12px}
-main{max-width:520px;margin:auto;padding:0 12px 24px}
-.card{background:#151e2e;border:1px solid #2c3950;border-radius:18px;padding:17px;margin:14px 0}
-h2{font-size:19px}
-.balance{font-size:32px;font-weight:800;margin:8px}
-.coin{width:184px;height:184px;margin:20px auto;border-radius:50%;border:7px solid #ffd05a;background:radial-gradient(circle,#94702c,#332207);box-shadow:0 0 28px #ffc94b55;display:flex;align-items:center;justify-content:center;font-size:67px;font-weight:900;color:#ffe7a3;touch-action:manipulation}
-.stats{display:flex;gap:10px}
-.stat{flex:1;background:#202c40;border-radius:12px;padding:12px 5px}
-.stat b{display:block;margin-top:7px}
-.bar{height:11px;background:#303c50;border-radius:20px;overflow:hidden;margin:10px 0}
-#energyBar{height:100%;background:#ffd05a}
-button{border:0;border-radius:11px;padding:12px 16px;margin:5px;background:#ffd05a;color:#17130a;font-weight:bold}
-button.secondary,.question{background:#29374d;color:white}
-button:disabled{opacity:.45}
-input{width:90%;max-width:300px;background:#0d1421;color:white;border:1px solid #53627a;border-radius:10px;padding:12px;font-size:16px;margin:8px}
-.notice,.answer{padding:12px;border-radius:10px;background:#202c40;color:#dce5f2;font-size:13px;line-height:1.5;margin-top:10px}
-.reward-row{display:flex;justify-content:space-between;background:#202c40;border-radius:11px;padding:12px;margin:7px 0;text-align:left}
-.reward-row strong{color:#ffd05a}
-.robot-wrap{display:flex;align-items:center;gap:12px;text-align:left}
-.robot{width:76px;height:76px;border-radius:50%;border:2px solid #ffd05a;background:#33270f;display:flex;align-items:center;justify-content:center;font-size:34px}
-#verifyOverlay{position:fixed;inset:0;background:#050914ed;z-index:10;display:none;align-items:center;justify-content:center;padding:18px}
-.verify-box{width:100%;max-width:360px;background:#172236;border:1px solid #ffd05a;border-radius:20px;padding:22px}
-#palm{width:115px;height:115px;border-radius:50%;font-size:58px;touch-action:none}
-#holdProgress{height:9px;background:#344258;border-radius:20px;overflow:hidden;margin:15px 0}
-#holdBar{height:100%;width:0;background:#55d6a2}
-footer{color:#718099;font-size:11px;padding:14px}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: #0b1020;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+header {
+  text-align: center;
+  padding: 25px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #f5c542;
+}
+.balance {
+  text-align: center;
+  margin-top: 55px;
+}
+.balance h1 { font-size: 38px; }
+.coin {
+  display: block;
+  margin: 30px auto;
+  width: 155px;
+  height: 155px;
+  border-radius: 50%;
+  border: 5px solid #f5c542;
+  background: linear-gradient(145deg,#ffdf70,#d99b16);
+  color: #402800;
+  font-size: 65px;
+  cursor: pointer;
+  box-shadow: 0 0 35px #d99b1680;
+}
+.coin:active { transform: scale(.94); }
+.page {
+  display: none;
+  text-align: center;
+  padding: 25px;
+}
+.page.active { display: block; }
+nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  background: #151d32;
+  border-top: 1px solid #34415b;
+  padding: 10px 2px calc(10px + env(safe-area-inset-bottom));
+}
+nav button {
+  flex: 1;
+  border: 0;
+  background: none;
+  color: #aab4c8;
+  font-size: 11px;
+  padding: 5px 0;
+  cursor: pointer;
+}
+nav button span {
+  display: block;
+  font-size: 21px;
+  margin-bottom: 4px;
+}
+nav button.selected { color: #f5c542; }
 </style>
 </head>
 <body>
-<header>👑 SIDII COIN</header>
-<div class="sub">TAP • EARN • EXCHANGE</div>
-<main>
-<section class="card">
-<div class="small">GAME COINS</div>
-<div class="balance">🪙 <span id="coins">0</span></div>
-<div class="coin" id="coin">S</div>
-<div class="small">НАТИСКАЙ НА МОНЕТУ, ЩОБ ЗАРОБЛЯТИ</div>
-<div class="stats">
-<div class="stat">⚡ ЕНЕРГІЯ<b><span id="energy">1000</span>/1000</b></div>
-<div class="stat">🪙 ЗА ТАП<b>1</b></div>
-</div>
-<div class="bar"><div id="energyBar" style="width:100%"></div></div>
-<div class="small">Відновлення: 1 енергія за секунду</div>
-<div id="gameMessage" class="notice">Гарної гри в SIDII!</div>
-</section>
 
-<section class="card">
-<h2>💱 SIDII EXCHANGE</h2>
-<div class="small">1 000 GAME COINS = 0.00010 SIDII</div>
-<input id="exchangeAmount" type="number" min="1000" step="1000" placeholder="Кількість Game Coins">
-<br><button id="exchangeBtn">ОБМІНЯТИ</button>
-<div id="exchangeMessage" class="notice">Демонстраційний обмін.</div>
-<hr>
-<div class="small">SIDII BALANCE</div>
-<div class="balance"><span id="sidii">0.00000000</span> SIDII</div>
-<button class="secondary" id="withdrawBtn">📤 Виведення</button>
-<div class="small">Реальне виведення ще не підключене.</div>
-</section>
+<header>SIDII</header>
 
-<section class="card">
-<h2>🎁 DAILY REWARDS</h2>
-<div class="small">Пропустив день — цикл починається знову.</div>
-<div id="dailyList"></div>
-<div id="dailyMessage" class="notice">Твоя нагорода чекає!</div>
-<button id="claimDaily">ЗАБРАТИ НАГОРОДУ</button>
-</section>
+<div id="game" class="page active">
+  <div class="balance">
+    <p>ТВІЙ БАЛАНС</p>
+    <h1><span id="coins">0</span> 🪙</h1>
+    <button class="coin" onclick="tap()">🪙</button>
+    <p>Натискай на монету!</p>
+  </div>
+</div>
 
-<section class="card">
-<h2>🤖 SIDII ASSISTANT</h2>
-<div class="robot-wrap">
-<div class="robot">👑</div>
-<div><b style="color:#ffd05a">SIDII Assistant</b><div class="small">Твій ігровий помічник</div></div>
+<div id="upgrade" class="page">
+  <h2>⚡ Upgrade</h2>
+  <p>Покращення скоро з'являться!</p>
 </div>
-<div class="answer" id="answer">👋 Привіт! Я SIDII — твій помічник!</div>
-<button class="question" data-help="welcome">👋 Привітання</button>
-<button class="question" data-help="game">🎮 Як грати?</button>
-<button class="question" data-help="exchange">💱 Обмінник</button>
-<button class="question" data-help="energy">⚡ Енергія</button>
-<button class="question" data-help="bonus">🎁 Бонуси</button>
-<button class="question" data-help="levels">🏆 Рівні</button>
-</section>
-<footer>SIDII COIN © 2026 • Демоверсія</footer>
-</main>
 
-<div id="verifyOverlay">
-<div class="verify-box">
-<div class="small">SIDII SECURITY CHECK</div>
-<h2>🖐️ Підтвердь, що ти граєш</h2>
-<p class="small">Затисни долоньку на 3 секунди й отримай 40 Game Coins.</p>
-<button id="palm">🖐️</button>
-<div id="holdProgress"><div id="holdBar"></div></div>
-<div id="holdText" class="small">Затисни й утримуй 3 секунди</div>
+<div id="friends" class="page">
+  <h2>👥 Друзі</h2>
+  <p>Запрошуй друзів у SIDII!</p>
 </div>
+
+<div id="profile" class="page">
+  <h2>👤 Профіль</h2>
+  <p>Гравець SIDII</p>
 </div>
+
+<nav>
+  <button class="selected" onclick="showPage('game',this)">
+    <span>🎮</span>Гра
+  </button>
+  <button onclick="showPage('upgrade',this)">
+    <span>⚡</span>Upgrade
+  </button>
+  <button onclick="showPage('friends',this)">
+    <span>👥</span>Друзі
+  </button>
+  <button onclick="showPage('profile',this)">
+    <span>👤</span>Профіль
+  </button>
+</nav>
 
 <script>
-const $=id=>document.getElementById(id);
-const read=(key,fallback)=>{
-try{let v=localStorage.getItem(key);return v===null?fallback:JSON.parse(v)}
-catch(e){return fallback}
-};
-let coins=Number(read("sidii_coins",0))||0;
-let sidii=Number(read("sidii_balance",0))||0;
-let energy=Number(read("sidii_energy",1000));
-energy=Math.max(0,Math.min(1000,Number.isFinite(energy)?energy:1000));
-let daily=read("sidii_daily",{day:1,lastClaim:""});
-let nextCheck=Date.now()+120000;
-let checkActive=false,holdStart=0,holdFrame=null;
+let coins = 0;
 
-function save(){
-localStorage.setItem("sidii_coins",JSON.stringify(coins));
-localStorage.setItem("sidii_balance",JSON.stringify(sidii));
-localStorage.setItem("sidii_energy",JSON.stringify(energy));
-localStorage.setItem("sidii_daily",JSON.stringify(daily));
+function tap() {
+  coins++;
+  document.getElementById('coins').textContent = coins;
 }
-function update(){
-$("coins").textContent=Math.floor(coins).toLocaleString("uk-UA");
-$("sidii").textContent=sidii.toFixed(8);
-$("energy").textContent=energy;
-$("energyBar").style.width=(energy/1000*100)+"%";
-save();
-}
-function localDay(){return new Date().toLocaleDateString("en-CA")}
-function showCheck(){
-checkActive=true;
-$("verifyOverlay").style.display="flex";
-$("gameMessage").textContent="Пройди перевірку долонькою!";
-}
-function finishCheck(){
-if(!checkActive)return;
-checkActive=false;
-$("verifyOverlay").style.display="none";
-coins+=40;
-$("gameMessage").textContent="Перевірку пройдено! +40 Game Coins 🪙";
-nextCheck=Date.now()+120000;
-update();
-}
-function cancelHold(){
-if(holdFrame)cancelAnimationFrame(holdFrame);
-holdFrame=null;holdStart=0;
-$("holdBar").style.width="0%";
-}
-function startHold(e){
-if(!checkActive||holdStart)return;
-e.preventDefault();
-holdStart=Date.now();
-function tick(){
-if(!holdStart)return;
-let pct=Math.min(100,(Date.now()-holdStart)/3000*100);
-$("holdBar").style.width=pct+"%";
-if(pct>=100){cancelHold();finishCheck()}
-else holdFrame=requestAnimationFrame(tick);
-}
-holdFrame=requestAnimationFrame(tick);
-}
-$("palm").addEventListener("pointerdown",startHold);
-["pointerup","pointerleave","pointercancel"].forEach(ev=>$("palm").addEventListener(ev,cancelHold));
 
-$("coin").onclick=()=>{
-if(checkActive)return;
-if(energy<=0){$("gameMessage").textContent="Енергія закінчилась ⚡";return}
-coins++;energy--;update();
-};
-
-$("exchangeBtn").onclick=()=>{
-let amount=Number($("exchangeAmount").value);
-if(!Number.isInteger(amount)||amount<1000){
-$("exchangeMessage").textContent="Мінімум 1 000 Game Coins.";return}
-if(amount>coins){$("exchangeMessage").textContent="Недостатньо монет.";return}
-coins-=amount;sidii+=amount*0.0000001;
-$("exchangeAmount").value="";
-$("exchangeMessage").textContent="Демо-обмін виконано!";
-update();
-};
-$("withdrawBtn").onclick=()=>alert("Реальне виведення ще не підключене.");
-
-function renderDaily(){
-let rewards=["1 000 Game Coins","2 000 Game Coins","3 000 Game Coins","4 000 Game Coins","5 000 Game Coins","6 000 Game Coins","1 SIDII COIN 💎"];
-$("dailyList").innerHTML=rewards.map((r,i)=>`<div class="reward-row"><span>День ${i+1}</span><strong>${r}</strong></div>`).join("");
+function showPage(id, button) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('selected'));
+  button.classList.add('selected');
 }
-$("claimDaily").onclick=()=>{
-let today=localDay();
-if(daily.lastClaim===today){
-$("dailyMessage").textContent="Ти вже отримав нагороду сьогодні!";return}
-if(daily.lastClaim){
-let yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
-if(daily.lastClaim!==yesterday.toLocaleDateString("en-CA"))daily.day=1;
-}
-let day=Math.max(1,Math.min(7,Number(daily.day)||1));
-if(day===7){sidii+=1;$("dailyMessage").textContent="Ти отримав 1 SIDII COIN 💎"}
-else{let reward=day*1000;coins+=reward;$("dailyMessage").textContent="Ти отримав "+reward+" Game Coins!"}
-daily.lastClaim=today;daily.day=day===7?1:day+1;
-update();
-};
-
-const answers={
-welcome:"👋 Привіт! Я SIDII, твій помічник. Допоможу з грою, енергією та обмінником.",
-game:"🎮 Натискай на монету S. Кожен тап дає 1 Game Coin і витрачає 1 енергію.",
-exchange:"💱 Обмінюй від 1 000 Game Coins. Курс: 1 000 = 0.00010 SIDII.",
-energy:"⚡ Кожен тап витрачає 1 енергію. Вона відновлюється на 1 одиницю за секунду.",
-bonus:"🎁 Дні 1–6 дають Game Coins, на 7-й день — 1 SIDII COIN. Пропуск дня скидає цикл.",
-levels:"🏆 Система рівнів буде додана в наступному оновленні."
-};
-document.querySelectorAll("[data-help]").forEach(b=>b.onclick=()=>{$("answer").textContent=answers[b.dataset.help]});
-renderDaily();update();
-setInterval(()=>{
-if(energy<1000){energy=Math.min(1000,energy+1);update()}
-if(!checkActive&&Date.now()>=nextCheck)showCheck();
-},1000);
 </script>
+
 </body>
 </html>
