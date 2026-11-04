@@ -21,7 +21,14 @@ select,input{
  background:#182238;color:white;border:1px solid #34415d;
  padding:10px;border-radius:10px;
 }
-main{max-width:480px;margin:auto;padding:18px 15px 100px}
+main{
+ width:100%;
+ max-width:none;
+ min-height:calc(100vh - 70px);
+ margin:0;
+ padding:18px 15px 100px;
+ box-sizing:border-box;
+}
 .screen{display:none}
 .screen.active{display:block}
 .card{
