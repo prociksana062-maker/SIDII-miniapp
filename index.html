@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -6,131 +5,460 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SIDII</title>
 <style>
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  background: #0b1020;
-  color: white;
-  font-family: Arial, sans-serif;
+*{box-sizing:border-box}
+body{
+ margin:0;background:#090d18;color:white;
+ font-family:Arial,sans-serif;
+ min-height:100vh;
 }
-header {
-  text-align: center;
-  padding: 25px;
-  font-size: 28px;
-  font-weight: bold;
-  color: #f5c542;
+header{
+ padding:18px 16px;display:flex;
+ justify-content:space-between;align-items:center;
+ border-bottom:1px solid #273047;
 }
-.balance {
-  text-align: center;
-  margin-top: 55px;
+.logo{font-size:27px;font-weight:900;color:#f5c542;letter-spacing:3px}
+select,input{
+ background:#182238;color:white;border:1px solid #34415d;
+ padding:10px;border-radius:10px;
 }
-.balance h1 { font-size: 38px; }
-.coin {
-  display: block;
-  margin: 30px auto;
-  width: 155px;
-  height: 155px;
-  border-radius: 50%;
-  border: 5px solid #f5c542;
-  background: linear-gradient(145deg,#ffdf70,#d99b16);
-  color: #402800;
-  font-size: 65px;
-  cursor: pointer;
-  box-shadow: 0 0 35px #d99b1680;
+main{max-width:480px;margin:auto;padding:18px 15px 100px}
+.screen{display:none}
+.screen.active{display:block}
+.card{
+ background:linear-gradient(145deg,#19243a,#101827);
+ border:1px solid #293650;border-radius:18px;
+ padding:18px;margin-bottom:15px;
 }
-.coin:active { transform: scale(.94); }
-.page {
-  display: none;
-  text-align: center;
-  padding: 25px;
+h2{font-size:21px;margin:5px 0 16px}
+.muted{color:#9ba9c2;font-size:13px}
+.balance{text-align:center;font-size:35px;font-weight:bold;color:#f5c542}
+.coin{
+ width:190px;height:190px;border-radius:50%;
+ margin:25px auto;
+ display:flex;align-items:center;justify-content:center;
+ background:radial-gradient(circle at 35% 30%,#ffe78b,#e9a91c 55%,#855000);
+ border:8px solid #ffdc68;
+ box-shadow:0 0 35px #d99b2c55,inset 0 0 20px #fff7;
+ color:#553400;font-size:39px;font-weight:900;
+ cursor:pointer;user-select:none;
+ transition:transform .08s;
 }
-.page.active { display: block; }
-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  display: flex;
-  justify-content: space-around;
-  background: #151d32;
-  border-top: 1px solid #34415b;
-  padding: 10px 2px calc(10px + env(safe-area-inset-bottom));
+.coin:active{transform:scale(.94)}
+.bar{
+ height:13px;background:#303c53;border-radius:20px;
+ overflow:hidden;margin:10px 0;
 }
-nav button {
-  flex: 1;
-  border: 0;
-  background: none;
-  color: #aab4c8;
-  font-size: 11px;
-  padding: 5px 0;
-  cursor: pointer;
+.fill{height:100%;width:100%;background:linear-gradient(90deg,#23d5a0,#a5ef71)}
+button{
+ border:0;border-radius:12px;padding:13px;
+ background:#f1b92d;color:#17120a;
+ font-weight:bold;font-size:14px;cursor:pointer;
 }
-nav button span {
-  display: block;
-  font-size: 21px;
-  margin-bottom: 4px;
+button:disabled{opacity:.4;cursor:not-allowed}
+.btn2{background:#263650;color:white}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.stat{font-size:23px;font-weight:bold;color:#f5c542}
+.nav{
+ position:fixed;bottom:0;left:0;right:0;
+ background:#101827;border-top:1px solid #293650;
+ display:flex;justify-content:space-around;
+ padding:10px 3px calc(10px + env(safe-area-inset-bottom));
+ z-index:10;
 }
-nav button.selected { color: #f5c542; }
+.nav button{
+ flex:1;min-width:0;padding:9px 1px;
+ background:transparent;color:#9ba9c2;
+ font-size:10px;border-radius:8px;
+ white-space:nowrap;
+}
+.nav button.active{color:#f5c542;background:#202d42}
+.nav span{display:block;font-size:18px;margin-bottom:4px}
+.big{font-size:28px;color:#f5c542;font-weight:bold}
+input{width:100%;margin:10px 0}
+.note{font-size:12px;color:#91a0b9;line-height:1.5}
 </style>
 </head>
 <body>
 
-<header>SIDII</header>
+<header>
+ <div class="logo">SIDII</div>
+ <select id="language" onchange="changeLanguage(this.value)">
+  <option value="uk">🇺🇦 Українська</option>
+  <option value="ru">🇷🇺 Русский</option>
+  <option value="en">🇬🇧 English</option>
+ </select>
+</header>
 
-<div id="game" class="page active">
-  <div class="balance">
-    <p>ТВІЙ БАЛАНС</p>
-    <h1><span id="coins">0</span> 🪙</h1>
-    <button class="coin" onclick="tap()">🪙</button>
-    <p>Натискай на монету!</p>
+<main>
+
+<section id="home" class="screen active">
+ <div class="card">
+  <div class="muted" id="coinsLabel">ТВОЇ COINS</div>
+  <div class="balance" id="coins">0</div>
+  <div class="muted" style="text-align:center">COINS</div>
+ </div>
+
+ <div class="coin" id="tapCoin">SIDII</div>
+
+ <div class="card">
+  <div class="row">
+   <b id="energyLabel">⚡ Енергія</b>
+   <b id="energyText">100 / 100</b>
   </div>
-</div>
+  <div class="bar"><div class="fill" id="energyBar"></div></div>
+  <div class="muted" id="energyHint">Енергія відновлюється автоматично</div>
+ </div>
 
-<div id="upgrade" class="page">
-  <h2>⚡ Upgrade</h2>
-  <p>Покращення скоро з'являться!</p>
-</div>
+ <div class="card row">
+  <div>
+   <div class="muted" id="powerLabel">Сила натискання</div>
+   <div class="stat" id="power">+1</div>
+  </div>
+  <div>
+   <div class="muted">SIDII</div>
+   <div class="stat" id="sidii">0.00000000</div>
+  </div>
+ </div>
+</section>
 
-<div id="friends" class="page">
-  <h2>👥 Друзі</h2>
-  <p>Запрошуй друзів у SIDII!</p>
-</div>
+<section id="mining" class="screen">
+ <h2 id="miningTitle">⛏️ AFK MINING</h2>
+ <div class="card">
+  <div class="muted" id="miningStatus">Статус майнінгу</div>
+  <div class="big" id="miningLevel">Не куплено</div>
+  <p class="muted" id="miningRate">Дохід: 0 COINS / год</p>
+  <p id="miningEarn">Накопичено: 0 COINS</p>
+  <button id="buyMining" onclick="buyMining()">КУПИТИ МАЙНІНГ · 5 000 COINS</button>
+  <button id="upgradeMining" class="btn2" onclick="upgradeMining()" style="width:100%;margin-top:10px;display:none">ПРОКАЧАТИ</button>
+  <button id="claimMining" onclick="claimMining()" style="width:100%;margin-top:10px;display:none">ЗАБРАТИ COINS</button>
+ </div>
+ <div class="card">
+  <b id="miningInfo">Як працює AFK Mining?</b>
+  <p class="note" id="miningDescription">
+   Купи майнінг. Він накопичуватиме COINS, навіть коли ти не в грі.
+   Максимальний час накопичення — 8 годин.
+  </p>
+ </div>
+</section>
 
-<div id="profile" class="page">
-  <h2>👤 Профіль</h2>
-  <p>Гравець SIDII</p>
-</div>
+<section id="exchange" class="screen">
+ <h2 id="exchangeTitle">💱 Обмін COINS на SIDII</h2>
+ <div class="card">
+  <div class="muted" id="yourCoins">Твої COINS</div>
+  <div class="big" id="exchangeCoins">0</div>
+  <div class="muted" id="yourSidii">Твій баланс SIDII</div>
+  <div class="stat" id="exchangeSidii">0.00000000</div>
+  <hr style="border-color:#34415d;margin:20px 0">
+  <div class="muted" id="amountLabel">Скільки COINS обміняти?</div>
+  <input id="exchangeAmount" type="number" min="1000" step="1000" placeholder="Мінімум 1000">
+  <p class="note" id="exchangeRate">1 000 COINS = 0,00010 SIDII</p>
+  <p id="exchangePreview">Отримаєш: 0.00000000 SIDII</p>
+  <button onclick="exchangeCoins()" style="width:100%" id="exchangeButton">ОБМІНЯТИ</button>
+  <p class="note" id="exchangeNote">Внутрішній ігровий обмін. Це не реальна виплата криптовалюти.</p>
+ </div>
+</section>
 
-<nav>
-  <button class="selected" onclick="showPage('game',this)">
-    <span>🎮</span>Гра
-  </button>
-  <button onclick="showPage('upgrade',this)">
-    <span>⚡</span>Upgrade
-  </button>
-  <button onclick="showPage('friends',this)">
-    <span>👥</span>Друзі
-  </button>
-  <button onclick="showPage('profile',this)">
-    <span>👤</span>Профіль
-  </button>
+<section id="shop" class="screen">
+ <h2 id="shopTitle">🛒 Магазин покращень</h2>
+ <div class="card">
+  <b id="tapUpgradeTitle">Сила натискання</b>
+  <p class="muted" id="tapUpgradeDescription">Отримуй більше COINS за кожен тап.</p>
+  <div class="row">
+   <span id="tapUpgradeLevel">Рівень 1</span>
+   <span class="stat" id="tapUpgradePrice">100 COINS</span>
+  </div>
+  <button onclick="upgradeTap()" style="width:100%;margin-top:14px" id="tapUpgradeButton">ПОКРАЩИТИ</button>
+ </div>
+</section>
+
+<section id="rating" class="screen">
+ <h2 id="ratingTitle">🏆 Рейтинг</h2>
+ <div class="card">
+  <div class="big" id="ratingPlace">Твій результат</div>
+  <p id="ratingCoins">0 COINS</p>
+  <p class="note" id="ratingNote">Поки що це особистий результат на цьому пристрої. Глобальний рейтинг потребує сервера.</p>
+ </div>
+</section>
+
+</main>
+
+<nav class="nav">
+ <button class="active" onclick="showScreen('home',this)"><span>🏠</span><b id="navHome">Головна</b></button>
+ <button onclick="showScreen('mining',this)"><span>⛏️</span><b id="navMining">Майнінг</b></button>
+ <button onclick="showScreen('exchange',this)"><span>💱</span><b id="navExchange">Обмін</b></button>
+ <button onclick="showScreen('shop',this)"><span>🛒</span><b id="navShop">Магазин</b></button>
+ <button onclick="showScreen('rating',this)"><span>🏆</span><b id="navRating">Рейтинг</b></button>
 </nav>
 
 <script>
-let coins = 0;
+const KEY='sidii_game_v1';
 
-function tap() {
-  coins++;
-  document.getElementById('coins').textContent = coins;
+const defaults={
+ coins:0,
+ sidiiUnits:0,
+ energy:100,
+ maxEnergy:100,
+ power:1,
+ tapLevel:1,
+ miningLevel:0,
+ miningTime:Date.now(),
+ lastEnergy:Date.now(),
+ lang:'uk'
+};
+
+let game;
+try{
+ game={...defaults,...JSON.parse(localStorage.getItem(KEY)||'{}')};
+}catch(e){game={...defaults};}
+
+const words={
+ uk:{
+  coins:'ТВОЇ COINS',energy:'⚡ Енергія',energyHint:'Енергія відновлюється автоматично',
+  power:'Сила натискання',mining:'⛏️ AFK MINING',notBought:'Не куплено',
+  bought:'Рівень',rate:'Дохід:',earned:'Накопичено:',
+  buy:'КУПИТИ МАЙНІНГ · 5 000 COINS',upgrade:'ПРОКАЧАТИ',
+  claim:'ЗАБРАТИ COINS',miningInfo:'Як працює AFK Mining?',
+  miningDescription:'Купи майнінг. Він накопичуватиме COINS, навіть коли ти не в грі. Максимальний час накопичення — 8 годин.',
+  exchange:'💱 Обмін COINS на SIDII',yourCoins:'Твої COINS',
+  yourSidii:'Твій баланс SIDII',amount:'Скільки COINS обміняти?',
+  rateText:'1 000 COINS = 0,00010 SIDII',receive:'Отримаєш:',
+  exchangeButton:'ОБМІНЯТИ',exchangeNote:'Внутрішній ігровий обмін. Це не реальна виплата криптовалюти.',
+  shop:'🛒 Магазин покращень',tapTitle:'Сила натискання',
+  tapDesc:'Отримуй більше COINS за кожен тап.',
+  level:'Рівень',improve:'ПОКРАЩИТИ',rating:'🏆 Рейтинг',
+  result:'Твій результат',ratingNote:'Поки що це особистий результат на цьому пристрої. Глобальний рейтинг потребує сервера.',
+  home:'Головна',miningNav:'Майнінг',exchangeNav:'Обмін',shopNav:'Магазин',ratingNav:'Рейтинг',
+  minError:'Мінімум для обміну — 1 000 COINS.',
+  balanceError:'Недостатньо COINS.',
+  energyError:'Немає енергії! Зачекай, поки вона відновиться.',
+  success:'Обмін успішний!',buySuccess:'Майнінг придбано!',
+  upgradeSuccess:'Покращення придбано!',tapPrice:'Ціна:',
+  miningPrice:'Ціна покращення:',preview:'Отримаєш:',
+  miningOff:'Майнінг не куплено'
+ },
+ ru:{
+  coins:'ТВОИ COINS',energy:'⚡ Энергия',energyHint:'Энергия восстанавливается автоматически',
+  power:'Сила нажатия',mining:'⛏️ AFK MINING',notBought:'Не куплено',
+  bought:'Уровень',rate:'Доход:',earned:'Накоплено:',
+  buy:'КУПИТЬ МАЙНИНГ · 5 000 COINS',upgrade:'УЛУЧШИТЬ',
+  claim:'ЗАБРАТЬ COINS',miningInfo:'Как работает AFK Mining?',
+  miningDescription:'Купи майнинг. Он будет накапливать COINS, даже когда тебя нет в игре. Максимальное время накопления — 8 часов.',
+  exchange:'💱 Обмен COINS на SIDII',yourCoins:'Твои COINS',
+  yourSidii:'Твой баланс SIDII',amount:'Сколько COINS обменять?',
+  rateText:'1 000 COINS = 0,00010 SIDII',receive:'Получишь:',
+  exchangeButton:'ОБМЕНЯТЬ',exchangeNote:'Внутриигровой обмен. Это не реальная выплата криптовалюты.',
+  shop:'🛒 Магазин улучшений',tapTitle:'Сила нажатия',
+  tapDesc:'Получай больше COINS за каждый тап.',
+  level:'Уровень',improve:'УЛУЧШИТЬ',rating:'🏆 Рейтинг',
+  result:'Твой результат',ratingNote:'Пока это личный результат на этом устройстве. Для общего рейтинга нужен сервер.',
+  home:'Главная',miningNav:'Майнинг',exchangeNav:'Обмен',shopNav:'Магазин',ratingNav:'Рейтинг',
+  minError:'Минимум для обмена — 1 000 COINS.',
+  balanceError:'Недостаточно COINS.',
+  energyError:'Нет энергии! Подожди, пока она восстановится.',
+  success:'Обмен успешен!',buySuccess:'Майнинг куплен!',
+  upgradeSuccess:'Улучшение куплено!',tapPrice:'Цена:',
+  miningPrice:'Цена улучшения:',preview:'Получишь:',
+  miningOff:'Майнинг не куплен'
+ },
+ en:{
+  coins:'YOUR COINS',energy:'⚡ Energy',energyHint:'Energy regenerates automatically',
+  power:'Tap power',mining:'⛏️ AFK MINING',notBought:'Not purchased',
+  bought:'Level',rate:'Income:',earned:'Collected:',
+  buy:'BUY MINING · 5,000 COINS',upgrade:'UPGRADE',
+  claim:'CLAIM COINS',miningInfo:'How does AFK Mining work?',
+  miningDescription:'Buy mining. It will collect COINS while you are away. Maximum accumulation time is 8 hours.',
+  exchange:'💱 Exchange COINS to SIDII',yourCoins:'Your COINS',
+  yourSidii:'Your SIDII balance',amount:'How many COINS to exchange?',
+  rateText:'1,000 COINS = 0.00010 SIDII',receive:'You receive:',
+  exchangeButton:'EXCHANGE',exchangeNote:'In-game exchange only. This is not a real cryptocurrency payout.',
+  shop:'🛒 Upgrade shop',tapTitle:'Tap power',
+  tapDesc:'Get more COINS for every tap.',
+  level:'Level',improve:'UPGRADE',rating:'🏆 Leaderboard',
+  result:'Your result',ratingNote:'This is currently a local result on this device. A global leaderboard requires a server.',
+  home:'Home',miningNav:'Mining',exchangeNav:'Exchange',shopNav:'Shop',ratingNav:'Rating',
+  minError:'Minimum exchange is 1,000 COINS.',
+  balanceError:'Not enough COINS.',
+  energyError:'No energy! Wait for it to regenerate.',
+  success:'Exchange successful!',buySuccess:'Mining purchased!',
+  upgradeSuccess:'Upgrade purchased!',tapPrice:'Price:',
+  miningPrice:'Upgrade price:',preview:'You receive:',
+  miningOff:'Mining not purchased'
+ }
+};
+
+function save(){
+ localStorage.setItem(KEY,JSON.stringify(game));
 }
 
-function showPage(id, button) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  document.querySelectorAll('nav button').forEach(b => b.classList.remove('selected'));
-  button.classList.add('selected');
+function t(k){return words[game.lang][k]||k;}
+function fmt(n){return Math.floor(n).toLocaleString('en-US');}
+function sidiiText(){
+ return (game.sidiiUnits/100000000).toFixed(8);
 }
+function miningIncome(){
+ return game.miningLevel*10;
+}
+function miningAvailable(){
+ if(!game.miningLevel)return 0;
+ let seconds=Math.min(28800,(Date.now()-game.miningTime)/1000);
+ return Math.floor(seconds*miningIncome()/3600);
+}
+
+function updateEnergy(){
+ let now=Date.now();
+ let elapsed=Math.floor((now-game.lastEnergy)/3000);
+ if(elapsed>0){
+  game.energy=Math.min(game.maxEnergy,game.energy+elapsed);
+  game.lastEnergy+=elapsed*3000;
+ }
+}
+
+function render(){
+ updateEnergy();
+
+ document.getElementById('coins').textContent=fmt(game.coins);
+ document.getElementById('sidii').textContent=sidiiText();
+ document.getElementById('energyText').textContent=game.energy+' / '+game.maxEnergy;
+ document.getElementById('energyBar').style.width=(game.energy/game.maxEnergy*100)+'%';
+ document.getElementById('power').textContent='+'+game.power;
+
+ document.getElementById('miningLevel').textContent=
+  game.miningLevel?t('bought')+' '+game.miningLevel:t('notBought');
+ document.getElementById('miningRate').textContent=
+  t('rate')+' '+miningIncome()+' COINS / hour';
+ document.getElementById('miningEarn').textContent=
+  t('earned')+' '+fmt(miningAvailable())+' COINS';
+
+ document.getElementById('buyMining').style.display=game.miningLevel?'none':'block';
+ document.getElementById('upgradeMining').style.display=game.miningLevel?'block':'none';
+ document.getElementById('claimMining').style.display=game.miningLevel?'block':'none';
+
+ document.getElementById('upgradeMining').textContent=
+  t('upgrade')+' · '+fmt(5000*game.miningLevel)+' COINS';
+
+ document.getElementById('exchangeCoins').textContent=fmt(game.coins);
+ document.getElementById('exchangeSidii').textContent=sidiiText();
+ document.getElementById('ratingCoins').textContent=fmt(game.coins)+' COINS';
+
+ document.getElementById('tapUpgradeLevel').textContent=
+  t('level')+' '+game.tapLevel;
+ document.getElementById('tapUpgradePrice').textContent=
+  fmt(100*game.tapLevel)+' COINS';
+ document.getElementById('tapUpgradeButton').textContent=
+  t('improve')+' · '+fmt(100*game.tapLevel)+' COINS';
+
+ save();
+}
+
+function showScreen(id,button){
+ document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+ document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
+ if(button)button.classList.add('active');
+ render();
+}
+
+document.getElementById('tapCoin').addEventListener('click',()=>{
+ updateEnergy();
+ if(game.energy<=0){alert(t('energyError'));return;}
+ game.coins+=game.power;
+ game.energy--;
+ render();
+});
+
+function buyMining(){
+ if(game.coins<5000){alert(t('balanceError'));return;}
+ game.coins-=5000;
+ game.miningLevel=1;
+ game.miningTime=Date.now();
+ save();render();alert(t('buySuccess'));
+}
+
+function upgradeMining(){
+ let price=5000*game.miningLevel;
+ if(game.coins<price){alert(t('balanceError'));return;}
+ game.coins-=price;
+ game.miningLevel++;
+ save();render();alert(t('upgradeSuccess'));
+}
+
+function claimMining(){
+ let earned=miningAvailable();
+ if(earned<=0){alert('No COINS yet!');return;}
+ game.coins+=earned;
+ game.miningTime=Date.now();
+ save();render();
+}
+
+function upgradeTap(){
+ let price=100*game.tapLevel;
+ if(game.coins<price){alert(t('balanceError'));return;}
+ game.coins-=price;
+ game.tapLevel++;
+ game.power++;
+ save();render();alert(t('upgradeSuccess'));
+}
+
+function exchangeCoins(){
+ let amount=Math.floor(Number(document.getElementById('exchangeAmount').value));
+ if(!Number.isFinite(amount)||amount<1000){
+  alert(t('minError'));return;
+ }
+ if(amount>game.coins){alert(t('balanceError'));return;}
+
+ game.coins-=amount;
+ // 1 COIN = 10 units of 0.00000001 SIDII
+ game.sidiiUnits+=amount*10;
+
+ save();render();
+ document.getElementById('exchangeAmount').value='';
+ alert(t('success'));
+}
+
+function updatePreview(){
+ let amount=Math.max(0,Math.floor(Number(document.getElementById('exchangeAmount').value)||0));
+ document.getElementById('exchangePreview').textContent=
+  t('receive')+' '+(amount*0.0000001).toFixed(8)+' SIDII';
+}
+document.getElementById('exchangeAmount').addEventListener('input',updatePreview);
+
+function changeLanguage(lang){
+ game.lang=lang;save();applyLanguage();render();
+}
+
+function setText(id,value){
+ document.getElementById(id).textContent=value;
+}
+
+function applyLanguage(){
+ let ids={
+  coinsLabel:'coins',energyLabel:'energy',energyHint:'energyHint',
+  powerLabel:'power',miningTitle:'mining',miningInfo:'miningInfo',
+  miningDescription:'miningDescription',exchangeTitle:'exchange',
+  yourCoins:'yourCoins',yourSidii:'yourSidii',amountLabel:'amount',
+  exchangeRate:'rateText',exchangeButton:'exchangeButton',
+  exchangeNote:'exchangeNote',shopTitle:'shop',tapUpgradeTitle:'tapTitle',
+  tapUpgradeDescription:'tapDesc',ratingTitle:'rating',
+  ratingPlace:'result',ratingNote:'ratingNote',
+  navHome:'home',navMining:'miningNav',navExchange:'exchangeNav',
+  navShop:'shopNav',navRating:'ratingNav'
+ };
+ Object.keys(ids).forEach(id=>setText(id,t(ids[id])));
+ document.getElementById('buyMining').textContent=t('buy');
+ document.getElementById('claimMining').textContent=t('claim');
+ document.getElementById('upgradeMining').textContent=t('upgrade');
+ document.getElementById('language').value=game.lang;
+ document.getElementById('exchangeAmount').placeholder=
+  game.lang==='en'?'Minimum 1000':'Минимум 1000';
+ updatePreview();
+}
+
+document.getElementById('language').value=game.lang;
+applyLanguage();
+render();
+
+// Update energy and mining display while the game is open.
+setInterval(render,1000);
 </script>
-
 </body>
 </html>
