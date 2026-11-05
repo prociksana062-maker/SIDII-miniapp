@@ -10,7 +10,7 @@ body{margin:0;background:#090d18;color:white;font-family:Arial,sans-serif;min-he
 header{padding:18px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #273047}
 .logo{font-size:27px;font-weight:900;color:#f5c542;letter-spacing:3px}
 select,input{background:#182238;color:white;border:1px solid #34415d;padding:10px;border-radius:10px}
-main{width:100%;min-height:calc(100vh - 70px);margin:0;padding:18px 15px 105px}
+main{width:100%;min-height:calc(100vh - 70px);padding:18px 15px 105px}
 .screen{display:none}
 .screen.active{display:block}
 .card{background:linear-gradient(145deg,#19243a,#101827);border:1px solid #293650;border-radius:18px;padding:18px;margin-bottom:15px}
@@ -18,11 +18,11 @@ h2{font-size:21px;margin:5px 0 16px}
 h3{margin:8px 0}
 .muted{color:#9ba9c2;font-size:13px}
 .balance{text-align:center;font-size:35px;font-weight:bold;color:#f5c542}
-.coin{width:190px;height:190px;border-radius:50%;margin:25px auto;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 35% 30%,#ffe78b,#e9a91c 55%,#855000);border:8px solid #ffdc68;box-shadow:0 0 35px #d99b2c55,inset 0 0 20px #fff7;color:#553400;font-size:39px;font-weight:900;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;transition:transform .08s}
+.coin{width:190px;height:190px;border-radius:50%;margin:25px auto;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 35% 30%,#ffe78b,#e9a91c 55%,#855000);border:8px solid #ffdc68;box-shadow:0 0 35px #d99b2c55,inset 0 0 20px #fff7;color:#553400;font-size:39px;font-weight:900;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;transition:transform .08s;touch-action:manipulation}
 .coin:active{transform:scale(.94)}
 .bar{height:13px;background:#303c53;border-radius:20px;overflow:hidden;margin:10px 0}
 .fill{height:100%;width:100%;background:linear-gradient(90deg,#23d5a0,#a5ef71);transition:width .2s}
-button{border:0;border-radius:12px;padding:13px;background:#f1b92d;color:#17120a;font-weight:bold;font-size:14px;cursor:pointer}
+button{border:0;border-radius:12px;padding:13px;background:#f1b92d;color:#17120a;font-weight:bold;font-size:14px;cursor:pointer;touch-action:manipulation}
 button:disabled{opacity:.4;cursor:not-allowed}
 .btn2{background:#263650;color:white}
 .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
@@ -83,7 +83,7 @@ input{width:100%;margin:10px 0}
    <b id="energyText">100 / 100</b>
   </div>
   <div class="bar"><div class="fill" id="energyBar"></div></div>
-  <div class="muted" id="energyHint">Енергія відновлюється автоматично</div>
+  <div class="muted">Енергія відновлюється автоматично</div>
  </div>
 
  <div class="card row">
@@ -227,143 +227,223 @@ const defaults={
  tapLevel:1,energyLevel:0,miningLevel:0,miningTime:Date.now(),
  lastEnergy:Date.now(),lang:'uk',totalTaps:0,
  boostMultiplier:1,boostUntil:0,
- taskDate:'',taskProgress:{},claimedTasks:[],
- achievements:[],totalEarned:0
+ taskDate:'',taskProgress:{taps:0,many:0,mining:0},
+ claimedTasks:[],achievements:[],totalEarned:0
 };
 
 let game;
+
 try{
- game={...defaults,...JSON.parse(localStorage.getItem(KEY)||'{}')};
-}catch(e){game={...defaults};}
+ const saved=JSON.parse(localStorage.getItem(KEY)||'{}');
+ game={...defaults,...saved};
+}catch(e){
+ game={...defaults};
+}
 
 game.taskProgress=game.taskProgress||{};
 game.claimedTasks=game.claimedTasks||[];
 game.achievements=game.achievements||[];
-game.energyLevel=game.energyLevel||0;
-game.totalTaps=game.totalTaps||0;
-game.totalEarned=game.totalEarned||0;
+game.energyLevel=Number(game.energyLevel)||0;
+game.totalTaps=Number(game.totalTaps)||0;
+game.totalEarned=Number(game.totalEarned)||0;
+game.coins=Math.max(0,Number(game.coins)||0);
+game.energy=Number(game.energy);
+if(!Number.isFinite(game.energy))game.energy=100;
 
 function save(){
- localStorage.setItem(KEY,JSON.stringify(game));
+ try{
+  localStorage.setItem(KEY,JSON.stringify(game));
+ }catch(e){
+  console.error('Помилка збереження:',e);
+ }
 }
 
-function fmt(n){return Math.floor(n).toLocaleString('en-US');}
-function sidiiText(){return (game.sidiiUnits/100000000).toFixed(8);}
-function t(k){return words[game.lang][k]||k;}
+function fmt(n){
+ return Math.floor(n).toLocaleString('en-US');
+}
+
+function sidiiText(){
+ return (game.sidiiUnits/100000000).toFixed(8);
+}
 
 const words={
  uk:{
-  noEnergy:'Енергія закінчилася!',notEnough:'Не вистачає COINS!',
-  bought:'Покупку успішно виконано!',upgrade:'Покращення куплено!',
-  exchange:'Обмін успішний!',reward:'Нагороду отримано!',
-  taskDone:'Завдання виконано!',energyUpgrade:'Швидкість енергії покращено!',
+  noEnergy:'Енергія закінчилася!',
+  notEnough:'Не вистачає COINS!',
+  bought:'Покупку успішно виконано!',
+  upgrade:'Покращення куплено!',
+  exchange:'Обмін успішний!',
+  energyUpgrade:'Швидкість енергії покращено!',
   maxLevel:'Досягнуто максимального рівня!',
-  boost:'Бустер активовано!',minExchange:'Мінімум для обміну — 1000 COINS.',
-  noMining:'Майнінг ще нічого не заробив.',
-  energyHint:'Енергія відновлюється автоматично',
-  level:'Рівень',price:'Ціна',claimed:'ОТРИМАНО',
-  claim:'ЗАБРАТИ',progress:'Прогрес'
+  boost:'Бустер активовано!',
+  minExchange:'Мінімум для обміну — 1000 COINS.',
+  noMining:'Майнінг ще нічого не заробив.'
  },
  ru:{
-  noEnergy:'Энергия закончилась!',notEnough:'Недостаточно COINS!',
-  bought:'Покупка успешно выполнена!',upgrade:'Улучшение куплено!',
-  exchange:'Обмен успешен!',reward:'Награда получена!',
-  taskDone:'Задание выполнено!',energyUpgrade:'Скорость энергии улучшена!',
+  noEnergy:'Энергия закончилась!',
+  notEnough:'Недостаточно COINS!',
+  bought:'Покупка успешно выполнена!',
+  upgrade:'Улучшение куплено!',
+  exchange:'Обмен успешен!',
+  energyUpgrade:'Скорость энергии улучшена!',
   maxLevel:'Достигнут максимальный уровень!',
-  boost:'Бустер активирован!',minExchange:'Минимум обмена — 1000 COINS.',
-  noMining:'Майнинг ещё ничего не заработал.',
-  energyHint:'Энергия восстанавливается автоматически',
-  level:'Уровень',price:'Цена',claimed:'ПОЛУЧЕНО',
-  claim:'ЗАБРАТЬ',progress:'Прогресс'
+  boost:'Бустер активирован!',
+  minExchange:'Минимум обмена — 1000 COINS.',
+  noMining:'Майнинг ещё ничего не заработал.'
  },
  en:{
-  noEnergy:'Energy is empty!',notEnough:'Not enough COINS!',
-  bought:'Purchase successful!',upgrade:'Upgrade purchased!',
-  exchange:'Exchange successful!',reward:'Reward received!',
-  taskDone:'Task completed!',energyUpgrade:'Energy speed upgraded!',
+  noEnergy:'Energy is empty!',
+  notEnough:'Not enough COINS!',
+  bought:'Purchase successful!',
+  upgrade:'Upgrade purchased!',
+  exchange:'Exchange successful!',
+  energyUpgrade:'Energy speed upgraded!',
   maxLevel:'Maximum level reached!',
-  boost:'Booster activated!',minExchange:'Minimum exchange is 1000 COINS.',
-  noMining:'Mining has not earned anything yet.',
-  energyHint:'Energy regenerates automatically',
-  level:'Level',price:'Price',claimed:'CLAIMED',
-  claim:'CLAIM',progress:'Progress'
+  boost:'Booster activated!',
+  minExchange:'Minimum exchange is 1000 COINS.',
+  noMining:'Mining has not earned anything yet.'
  }
 };
 
+function t(key){
+ return words[game.lang]?.[key]||words.uk[key]||key;
+}
+
 let toastTimer;
+
 function notify(title,icon='✅',message=''){
  const toast=document.getElementById('toast');
  document.getElementById('toastIcon').textContent=icon;
  document.getElementById('toastTitle').textContent=title;
  document.getElementById('toastMessage').textContent=message;
  toast.classList.add('show');
+
  clearTimeout(toastTimer);
- toastTimer=setTimeout(()=>toast.classList.remove('show'),2000);
+
+ toastTimer=setTimeout(()=>{
+  toast.classList.remove('show');
+ },2000);
 }
 
-function energySpeed(){return 1+game.energyLevel;}
+function energySpeed(){
+ return 1+game.energyLevel;
+}
 
 function updateEnergy(){
  const now=Date.now();
  const elapsed=Math.max(0,(now-game.lastEnergy)/1000);
- if(game.energy>=game.maxEnergy){
-  game.energy=game.maxEnergy;
-  game.lastEnergy=now;
- }else{
-  const gained=elapsed*energySpeed();
-  game.energy=Math.min(game.maxEnergy,game.energy+gained);
-  if(game.energy>=game.maxEnergy)game.lastEnergy=now;
-  else game.lastEnergy=now;
- }
+
+ game.energy=Math.min(
+  game.maxEnergy,
+  game.energy+elapsed*energySpeed()
+ );
+
+ game.lastEnergy=now;
 }
 
-function miningIncome(){return game.miningLevel*10;}
+function miningIncome(){
+ return game.miningLevel*10;
+}
+
 function miningAvailable(){
  if(!game.miningLevel)return 0;
- const seconds=Math.min(28800,Math.max(0,(Date.now()-game.miningTime)/1000));
+
+ const seconds=Math.min(
+  28800,
+  Math.max(0,(Date.now()-game.miningTime)/1000)
+ );
+
  return Math.floor(seconds*miningIncome()/3600);
 }
 
-function boostActive(){return game.boostUntil>Date.now();}
-function multiplier(){return boostActive()?game.boostMultiplier:1;}
+function boostActive(){
+ return game.boostUntil>Date.now();
+}
+
+function multiplier(){
+ return boostActive()?game.boostMultiplier:1;
+}
 
 function render(){
  updateEnergy();
+
  if(!boostActive()){
   game.boostMultiplier=1;
   game.boostUntil=0;
  }
+
  document.getElementById('coins').textContent=fmt(game.coins);
  document.getElementById('sidii').textContent=sidiiText();
- document.getElementById('energyText').textContent=Math.floor(game.energy)+' / '+game.maxEnergy;
- document.getElementById('energyBar').style.width=(game.energy/game.maxEnergy*100)+'%';
- document.getElementById('power').textContent='+'+game.power;
- document.getElementById('activeBoost').textContent='x'+multiplier();
- document.getElementById('boostTimer').textContent=boostActive()?
-  'Залишилось '+Math.ceil((game.boostUntil-Date.now())/1000)+' секунд':'Немає активного бустера';
 
- document.getElementById('miningLevel').textContent=game.miningLevel?'Рівень '+game.miningLevel:'Не куплено';
- document.getElementById('miningRate').textContent='Дохід: '+miningIncome()+' COINS / год';
- document.getElementById('miningEarn').textContent='Накопичено: '+fmt(miningAvailable())+' COINS';
- document.getElementById('buyMining').style.display=game.miningLevel?'none':'block';
- document.getElementById('upgradeMining').style.display=game.miningLevel?'block':'none';
- document.getElementById('claimMining').style.display=game.miningLevel?'block':'none';
- document.getElementById('upgradeMining').textContent='ПРОКАЧАТИ · '+fmt(5000*game.miningLevel)+' COINS';
+ document.getElementById('energyText').textContent=
+  Math.floor(game.energy)+' / '+game.maxEnergy;
+
+ document.getElementById('energyBar').style.width=
+  (game.energy/game.maxEnergy*100)+'%';
+
+ document.getElementById('power').textContent='+'+game.power;
+
+ document.getElementById('activeBoost').textContent='x'+multiplier();
+
+ document.getElementById('boostTimer').textContent=
+  boostActive()
+  ?'Залишилось '+Math.ceil((game.boostUntil-Date.now())/1000)+' секунд'
+  :'Немає активного бустера';
+
+ document.getElementById('miningLevel').textContent=
+  game.miningLevel?'Рівень '+game.miningLevel:'Не куплено';
+
+ document.getElementById('miningRate').textContent=
+  'Дохід: '+miningIncome()+' COINS / год';
+
+ document.getElementById('miningEarn').textContent=
+  'Накопичено: '+fmt(miningAvailable())+' COINS';
+
+ document.getElementById('buyMining').style.display=
+  game.miningLevel?'none':'block';
+
+ document.getElementById('upgradeMining').style.display=
+  game.miningLevel?'block':'none';
+
+ document.getElementById('claimMining').style.display=
+  game.miningLevel?'block':'none';
+
+ document.getElementById('upgradeMining').textContent=
+  'ПРОКАЧАТИ · '+fmt(5000*game.miningLevel)+' COINS';
 
  document.getElementById('exchangeCoins').textContent=fmt(game.coins);
  document.getElementById('exchangeSidii').textContent=sidiiText();
  document.getElementById('ratingCoins').textContent=fmt(game.coins)+' COINS';
 
- document.getElementById('tapUpgradeLevel').textContent='Рівень '+game.tapLevel;
- document.getElementById('tapUpgradePrice').textContent=fmt(100*game.tapLevel)+' COINS';
- document.getElementById('tapUpgradeButton').textContent='ПОКРАЩИТИ · '+fmt(100*game.tapLevel)+' COINS';
+ document.getElementById('tapUpgradeLevel').textContent=
+  'Рівень '+game.tapLevel;
 
- document.getElementById('energyLevel').textContent='Рівень '+game.energyLevel+' / 100';
- document.getElementById('energySpeed').textContent=energySpeed()+' / сек';
+ document.getElementById('tapUpgradePrice').textContent=
+  fmt(100*game.tapLevel)+' COINS';
+
+ document.getElementById('tapUpgradeButton').textContent=
+  'ПОКРАЩИТИ · '+fmt(100*game.tapLevel)+' COINS';
+
+ document.getElementById('energyLevel').textContent=
+  'Рівень '+game.energyLevel+' / 100';
+
+ document.getElementById('energySpeed').textContent=
+  energySpeed()+' / сек';
+
  const energyPrice=energyUpgradePrice();
- document.getElementById('energyPrice').textContent=game.energyLevel>=100?'Максимальний рівень':'Ціна: '+fmt(energyPrice)+' COINS';
- document.getElementById('energyUpgradeButton').textContent=game.energyLevel>=100?'МАКСИМУМ':'ПОКРАЩИТИ · '+fmt(energyPrice)+' COINS';
- document.getElementById('energyUpgradeButton').disabled=game.energyLevel>=100;
+
+ document.getElementById('energyPrice').textContent=
+  game.energyLevel>=100
+  ?'Максимальний рівень'
+  :'Ціна: '+fmt(energyPrice)+' COINS';
+
+ document.getElementById('energyUpgradeButton').textContent=
+  game.energyLevel>=100
+  ?'МАКСИМУМ'
+  :'ПОКРАЩИТИ · '+fmt(energyPrice)+' COINS';
+
+ document.getElementById('energyUpgradeButton').disabled=
+  game.energyLevel>=100;
 
  renderTasks();
  renderAchievements();
@@ -371,60 +451,105 @@ function render(){
 }
 
 function showScreen(id,button){
- document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+ document.querySelectorAll('.screen').forEach(x=>{
+  x.classList.remove('active');
+ });
+
  document.getElementById(id).classList.add('active');
- document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
+
+ document.querySelectorAll('.nav button').forEach(x=>{
+  x.classList.remove('active');
+ });
+
  if(button)button.classList.add('active');
+
  render();
 }
 
 document.getElementById('tapCoin').addEventListener('click',()=>{
  updateEnergy();
- if(game.energy<1){notify(t('noEnergy'),'⚡');return;}
+
+ if(game.energy<1){
+  notify(t('noEnergy'),'⚡');
+  return;
+ }
+
  const earned=game.power*multiplier();
+
  game.coins+=earned;
  game.totalEarned+=earned;
  game.totalTaps++;
+
  game.energy=Math.max(0,game.energy-1);
+
  game.taskProgress.taps=(game.taskProgress.taps||0)+1;
  game.taskProgress.many=(game.taskProgress.many||0)+1;
+
  checkAchievements();
  render();
 });
 
 function buyMining(){
- if(game.coins<5000){notify(t('notEnough'),'❌');return;}
+ if(game.coins<5000){
+  notify(t('notEnough'),'❌');
+  return;
+ }
+
  game.coins-=5000;
  game.miningLevel=1;
  game.miningTime=Date.now();
- render();notify(t('bought'),'⛏️');
+
+ render();
+ notify(t('bought'),'⛏️');
 }
 
 function upgradeMining(){
  const price=5000*game.miningLevel;
- if(game.coins<price){notify(t('notEnough'),'❌');return;}
+
+ if(game.coins<price){
+  notify(t('notEnough'),'❌');
+  return;
+ }
+
  game.coins-=price;
  game.miningLevel++;
- render();notify(t('upgrade'),'⛏️');
+
+ render();
+ notify(t('upgrade'),'⛏️');
 }
 
 function claimMining(){
  const earned=miningAvailable();
- if(earned<=0){notify(t('noMining'),'⛏️');return;}
+
+ if(earned<=0){
+  notify(t('noMining'),'⛏️');
+  return;
+ }
+
  game.coins+=earned;
  game.totalEarned+=earned;
  game.miningTime=Date.now();
+
  game.taskProgress.mining=(game.taskProgress.mining||0)+1;
- render();notify('+'+fmt(earned)+' COINS','💰');
+
+ render();
+ notify('+'+fmt(earned)+' COINS','💰');
 }
 
 function upgradeTap(){
  const price=100*game.tapLevel;
- if(game.coins<price){notify(t('notEnough'),'❌');return;}
+
+ if(game.coins<price){
+  notify(t('notEnough'),'❌');
+  return;
+ }
+
  game.coins-=price;
  game.tapLevel++;
  game.power++;
- render();notify(t('upgrade'),'👆');
+
+ render();
+ notify(t('upgrade'),'👆');
 }
 
 function energyUpgradePrice(){
@@ -432,39 +557,78 @@ function energyUpgradePrice(){
 }
 
 function upgradeEnergy(){
- if(game.energyLevel>=100){notify(t('maxLevel'),'⚡');return;}
+ if(game.energyLevel>=100){
+  notify(t('maxLevel'),'⚡');
+  return;
+ }
+
  const price=energyUpgradePrice();
- if(game.coins<price){notify(t('notEnough'),'❌');return;}
+
+ if(game.coins<price){
+  notify(t('notEnough'),'❌');
+  return;
+ }
+
  game.coins-=price;
  game.energyLevel++;
- render();notify(t('energyUpgrade'),'⚡',energySpeed()+' енергії за секунду');
+
+ render();
+ notify(t('energyUpgrade'),'⚡',energySpeed()+' енергії за секунду');
 }
 
 function buyBoost(mult,price){
- if(boostActive()){notify('Спочатку дочекайся завершення бустера','⏳');return;}
- if(game.coins<price){notify(t('notEnough'),'❌');return;}
+ if(boostActive()){
+  notify('Спочатку дочекайся завершення бустера','⏳');
+  return;
+ }
+
+ if(game.coins<price){
+  notify(t('notEnough'),'❌');
+  return;
+ }
+
  game.coins-=price;
  game.boostMultiplier=mult;
  game.boostUntil=Date.now()+60000;
- render();notify('Бустер x'+mult+' активовано!','🚀','Тривалість 60 секунд');
+
+ render();
+ notify('Бустер x'+mult+' активовано!','🚀','Тривалість 60 секунд');
 }
 
 function exchangeCoins(){
  const amount=Math.floor(Number(document.getElementById('exchangeAmount').value));
- if(!Number.isFinite(amount)||amount<1000){notify(t('minExchange'),'❌');return;}
- if(amount>game.coins){notify(t('notEnough'),'❌');return;}
+
+ if(!Number.isFinite(amount)||amount<1000){
+  notify(t('minExchange'),'❌');
+  return;
+ }
+
+ if(amount>game.coins){
+  notify(t('notEnough'),'❌');
+  return;
+ }
+
  game.coins-=amount;
  game.sidiiUnits+=amount*10;
+
  render();
+
  document.getElementById('exchangeAmount').value='';
  updatePreview();
+
  notify(t('exchange'),'💱');
 }
 
 function updatePreview(){
- const amount=Math.max(0,Math.floor(Number(document.getElementById('exchangeAmount').value)||0));
- document.getElementById('exchangePreview').textContent='Отримаєш: '+(amount*0.0000001).toFixed(8)+' SIDII';
+ const amount=Math.max(
+  0,
+  Math.floor(Number(document.getElementById('exchangeAmount').value)||0)
+ );
+
+ document.getElementById('exchangePreview').textContent=
+  'Отримаєш: '+(amount*0.0000001).toFixed(8)+' SIDII';
 }
+
 document.getElementById('exchangeAmount').addEventListener('input',updatePreview);
 
 const tasks=[
@@ -475,6 +639,7 @@ const tasks=[
 
 function resetDailyTasks(){
  const today=new Date().toLocaleDateString('en-CA');
+
  if(game.taskDate!==today){
   game.taskDate=today;
   game.taskProgress={taps:0,many:0,mining:0};
@@ -484,141 +649,42 @@ function resetDailyTasks(){
 
 function renderTasks(){
  resetDailyTasks();
+
  const container=document.getElementById('taskList');
  if(!container)return;
+
  container.innerHTML='';
+
  tasks.forEach(task=>{
   const progress=Math.min(task.goal,game.taskProgress[task.field]||0);
   const claimed=game.claimedTasks.includes(task.id);
   const complete=progress>=task.goal;
+
   const item=document.createElement('div');
   item.className='item'+(claimed?' task-done':'');
+
   const title=document.createElement('b');
   title.textContent=task.title;
+
   const info=document.createElement('p');
   info.className='progress-text';
   info.textContent='Прогрес: '+progress+' / '+task.goal+' · Нагорода: '+task.reward+' COINS';
+
   const bar=document.createElement('div');
   bar.className='bar';
+
   const fill=document.createElement('div');
   fill.className='fill';
   fill.style.width=(progress/task.goal*100)+'%';
+
   bar.appendChild(fill);
-  const button=document.createElement('butto
-const button=document.createElement('button');
-button.textContent=claimed?'ОТРИМАНО':complete?'ЗАБРАТИ':'ЩЕ НЕ ВИКОНАНО';
-button.disabled=!complete||claimed;
 
-button.onclick=()=>{
- if(!complete||claimed)return;
+  const button=document.createElement('button');
 
- game.coins+=task.reward;
- game.totalEarned+=task.reward;
- game.claimedTasks.push(task.id);
+  button.textContent=claimed
+   ?'ОТРИМАНО'
+   :complete
+    ?'ЗАБРАТИ'
+    :'ЩЕ НЕ ВИКОНАНО';
 
- render();
- notify('+'+fmt(task.reward)+' COINS','🎁');
-};
-
-item.appendChild(title);
-item.appendChild(info);
-item.appendChild(bar);
-item.appendChild(button);
-container.appendChild(item);
-});
-}
-
-function claimTask(id){
- const task=tasks.find(x=>x.id===id);
- if(!task)return;
- if(game.claimedTasks.includes(id))return;
-
- const progress=game.taskProgress[task.field]||0;
-
- if(progress<task.goal)return;
-
- game.coins+=task.reward;
- game.totalEarned+=task.reward;
- game.claimedTasks.push(id);
-
- render();
- notify('+'+fmt(task.reward)+' COINS','🎁');
-}
-
-const achievementData=[
- {id:'first',title:'Перший тап',goal:1,reward:100},
- {id:'taps100',title:'100 натискань',goal:100,reward:500},
- {id:'taps1000',title:'1000 натискань',goal:1000,reward:1000},
- {id:'taps5000',title:'5000 натискань',goal:5000,reward:3000},
- {id:'taps10000',title:'Майстер SIDII',goal:10000,reward:5000}
-];
-
-function checkAchievements(){
- achievementData.forEach(a=>{
-  if(game.totalTaps>=a.goal&&!game.achievements.includes(a.id)){
-   game.achievements.push(a.id);
-   game.coins+=a.reward;
-   game.totalEarned+=a.reward;
-   notify('Нове досягнення!','🏆',a.title+' · +'+a.reward+' COINS');
-  }
- });
-}
-
-function renderAchievements(){
- const container=document.getElementById('achievementList');
- if(!container)return;
-
- container.innerHTML='';
-
- achievementData.forEach(a=>{
-  const done=game.achievements.includes(a.id);
-  const item=document.createElement('div');
-  item.className='item'+(done?' task-done':'');
-
-  const title=document.createElement('b');
-  title.textContent=(done?'🏆 ':'🔒 ')+a.title;
-
-  const info=document.createElement('p');
-  info.className='progress-text';
-  info.textContent=
-   'Натискання: '+Math.min(game.totalTaps,a.goal)+' / '+a.goal+
-   ' · Нагорода: '+a.reward+' COINS';
-
-  item.appendChild(title);
-  item.appendChild(info);
-  container.appendChild(item);
- });
-}
-
-function changeLanguage(lang){
- if(!words[lang])return;
- game.lang=lang;
- render();
-}
-
-function initGame(){
- document.getElementById('language').value=game.lang||'uk';
-
- resetDailyTasks();
- checkAchievements();
- render();
-
- document.getElementById('tapCoin').style.pointerEvents='auto';
-
- setInterval(()=>{
-  render();
- },1000);
-}
-
-window.addEventListener('pageshow',()=>{
- render();
-});
-
-document.addEventListener('visibilitychange',()=>{
- if(!document.hidden)render();
-});
-
-initGame();
-</script>
-</body>
-</html>
+  butto
