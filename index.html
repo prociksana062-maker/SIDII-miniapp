@@ -682,9 +682,29 @@ function renderTasks(){
   const button=document.createElement('button');
 
   button.textContent=claimed
-   ?'ОТРИМАНО'
-   :complete
-    ?'ЗАБРАТИ'
-    :'ЩЕ НЕ ВИКОНАНО';
+ ?'ОТРИМАНО'
+ :complete
+  ?'ЗАБРАТИ'
+  :'ЩЕ НЕ ВИКОНАНО';
 
-  butto
+button.disabled=!complete||claimed;
+
+button.onclick=()=>{
+ if(!complete||claimed)return;
+
+ game.coins+=task.reward;
+ game.claimedTasks.push(task.id);
+
+ save();
+ render();
+ notify('Отримано '+task.reward+' COINS!','🎁');
+};
+
+item.appendChild(title);
+item.appendChild(info);
+item.appendChild(bar);
+item.appendChild(button);
+
+container.appendChild(item);
+});
+}
