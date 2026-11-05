@@ -68,7 +68,16 @@ input{width:100%;margin:10px 0}
 
 <main>
 
-<section id="home" class="screen active">
+<<section id="home" class="screen active">
+ <div class="card">
+  <h2>🎁 Щоденний бонус</h2>
+  <div class="muted" id="dailyBonusInfo">Заходь щодня та отримуй нагороди!</div>
+  <div class="big" id="dailyBonusReward">1 000 COINS</div>
+  <button class="action" id="dailyBonusButton" onclick="claimDailyBonus()">
+  ЗАБРАТИ БОНУС
+  </button>
+ </div>
+
  <div class="card">
   <div class="muted">ТВОЇ COINS</div>
   <div class="balance" id="coins">0</div>
@@ -222,7 +231,8 @@ input{width:100%;margin:10px 0}
 <script>
 const KEY='sidii_game_v1';
 
-const defaults={
+const defaults={ dailyStreakDay:0,
+ dailyLastClaimDate:''
  coins:0,sidiiUnits:0,energy:100,maxEnergy:100,power:1,
  tapLevel:1,energyLevel:0,miningLevel:0,miningTime:Date.now(),
  lastEnergy:Date.now(),lang:'uk',totalTaps:0,
@@ -637,7 +647,83 @@ const tasks=[
  {id:'mining',title:'Забери майнінг',goal:1,reward:1000,field:'mining'}
 ];
 
-function resetDailyTasks(){
+function localDay(){
+ const d=new Date();
+ return d.getFullYear()+'-'+
+  String(d.getMonth()+1).padStart(2,'0')+'-'+
+  String(d.getDate()).padStart(2,'0');
+}
+
+function dailyBonusDay(){
+ const today=localDay();
+ const last=game.dailyLastClaimDate||'';
+
+ if(last===today)return game.dailyStreakDay||1;
+
+ const yesterday=new Date();
+ yesterday.setDate(yesterday.getDate()-1);
+
+ const yesterdayKey=
+  yesterday.getFullYear()+'-'+
+  String(yesterday.getMonth()+1).padStart(2,'0')+'-'+
+  String(yesterday.getDate()).padStart(2,'0');
+
+ if(last===yesterdayKey){
+  return (game.dailyStreakDay%7)+1;
+ }
+
+ return 1;
+}
+
+function renderDailyBonus(){
+ const today=localDay();
+ const button=document.getElementById('dailyBonusButton');
+ const info=document.getElementById('dailyBonusInfo');
+ const reward=document.getElementById('dailyBonusReward');
+
+ if(!button||!info||!reward)return;
+
+ const day=dailyBonusDay();
+ const claimed=game.dailyLastClaimDate===today;
+
+ const rewards=[1000,2000,3000,4000,5000,6000];
+
+ if(claimed){
+  info.textContent='Сьогоднішній бонус уже отримано!';
+  reward.textContent='Наступний день: '+(day%7+1);
+  button.textContent='ВЖЕ ОТРИМАНО';
+  button.disabled=true;
+ }else{
+  info.textContent='День '+day+' із 7. Забирай нагороду!';
+  reward.textContent=day===7?'1 SIDII':rewards[day-1]+' COINS';
+  button.textContent='ЗАБРАТИ БОНУС';
+  button.disabled=false;
+ }
+}
+
+function claimDailyBonus(){
+ const today=localDay();
+
+ if(game.dailyLastClaimDate===today)return;
+
+ const day=dailyBonusDay();
+
+ if(day===7){
+  game.sidiiUnits+=100000000;
+  notify('Ти отримав 1 SIDII!','💎');
+ }else{
+  const amount=day*1000;
+  game.coins+=amount;
+  game.totalEarned+=amount;
+  notify('Отримано '+amount+' COINS!','🎁');
+ }
+
+ game.dailyStreakDay=day;
+ game.dailyLastClaimDate=today;
+
+ save();
+ render();
+}function resetDailyTasks(){
  const today=new Date().toLocaleDateString('en-CA');
 
  if(game.taskDate!==today){
@@ -750,9 +836,11 @@ function changeLanguage(lang){
 
 resetDailyTasks();
 render();
+renderDailyBonus();
 
 setInterval(()=>{
  render();
+ renderDailyBonus();
 },1000);
 
 </script>
