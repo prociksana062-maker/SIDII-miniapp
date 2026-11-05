@@ -505,3 +505,120 @@ function renderTasks(){
   fill.style.width=(progress/task.goal*100)+'%';
   bar.appendChild(fill);
   const button=document.createElement('butto
+const button=document.createElement('button');
+button.textContent=claimed?'ОТРИМАНО':complete?'ЗАБРАТИ':'ЩЕ НЕ ВИКОНАНО';
+button.disabled=!complete||claimed;
+
+button.onclick=()=>{
+ if(!complete||claimed)return;
+
+ game.coins+=task.reward;
+ game.totalEarned+=task.reward;
+ game.claimedTasks.push(task.id);
+
+ render();
+ notify('+'+fmt(task.reward)+' COINS','🎁');
+};
+
+item.appendChild(title);
+item.appendChild(info);
+item.appendChild(bar);
+item.appendChild(button);
+container.appendChild(item);
+});
+}
+
+function claimTask(id){
+ const task=tasks.find(x=>x.id===id);
+ if(!task)return;
+ if(game.claimedTasks.includes(id))return;
+
+ const progress=game.taskProgress[task.field]||0;
+
+ if(progress<task.goal)return;
+
+ game.coins+=task.reward;
+ game.totalEarned+=task.reward;
+ game.claimedTasks.push(id);
+
+ render();
+ notify('+'+fmt(task.reward)+' COINS','🎁');
+}
+
+const achievementData=[
+ {id:'first',title:'Перший тап',goal:1,reward:100},
+ {id:'taps100',title:'100 натискань',goal:100,reward:500},
+ {id:'taps1000',title:'1000 натискань',goal:1000,reward:1000},
+ {id:'taps5000',title:'5000 натискань',goal:5000,reward:3000},
+ {id:'taps10000',title:'Майстер SIDII',goal:10000,reward:5000}
+];
+
+function checkAchievements(){
+ achievementData.forEach(a=>{
+  if(game.totalTaps>=a.goal&&!game.achievements.includes(a.id)){
+   game.achievements.push(a.id);
+   game.coins+=a.reward;
+   game.totalEarned+=a.reward;
+   notify('Нове досягнення!','🏆',a.title+' · +'+a.reward+' COINS');
+  }
+ });
+}
+
+function renderAchievements(){
+ const container=document.getElementById('achievementList');
+ if(!container)return;
+
+ container.innerHTML='';
+
+ achievementData.forEach(a=>{
+  const done=game.achievements.includes(a.id);
+  const item=document.createElement('div');
+  item.className='item'+(done?' task-done':'');
+
+  const title=document.createElement('b');
+  title.textContent=(done?'🏆 ':'🔒 ')+a.title;
+
+  const info=document.createElement('p');
+  info.className='progress-text';
+  info.textContent=
+   'Натискання: '+Math.min(game.totalTaps,a.goal)+' / '+a.goal+
+   ' · Нагорода: '+a.reward+' COINS';
+
+  item.appendChild(title);
+  item.appendChild(info);
+  container.appendChild(item);
+ });
+}
+
+function changeLanguage(lang){
+ if(!words[lang])return;
+ game.lang=lang;
+ render();
+}
+
+function initGame(){
+ document.getElementById('language').value=game.lang||'uk';
+
+ resetDailyTasks();
+ checkAchievements();
+ render();
+
+ document.getElementById('tapCoin').style.pointerEvents='auto';
+
+ setInterval(()=>{
+  render();
+ },1000);
+}
+
+window.addEventListener('pageshow',()=>{
+ render();
+});
+
+document.addEventListener('visibilitychange',()=>{
+ if(!document.hidden)render();
+});
+
+initGame();
+</script>
+</body>
+</html>
