@@ -180,30 +180,35 @@ input{width:100%;margin:10px 0}
   <button onclick="upgradeEnergy()" class="action" id="energyUpgradeButton">ПОКРАЩИТИ</button>
  </div>
 
- <div class="card">
+<div class="card">
   <h3>🚀 Бустери</h3>
   <p class="muted">Тимчасово збільшують нагороду за натискання. Тривалість — 60 секунд.</p>
-  <div class="item">
-   <div class="row"><b>⚡ Бустер x2</b><b>500 COINS</b></div>
-   <button onclick="buyBoost(2,500)">КУПИТИ</button>
-  </div>
-  <div class="item">
-   <div class="row"><b>🔥 Бустер x5</b><b>2 000 COINS</b></div>
-   <button onclick="buyBoost(5,2000)">КУПИТИ</button>
-  </div>
-  <div class="item">
-   <div class="row"><b>💎 Бустер x10</b><b>5 000 COINS</b></div>
-   <button onclick="buyBoost(10,5000)">КУПИТИ</button>
-  </div>
- </div>
-</section>
 
-<section id="tasks" class="screen">
- <h2>🎯 Щоденні завдання</h2>
- <div class="card">
-  <p class="muted">Виконуй завдання та отримуй COINS. Завдання оновлюються щодня.</p>
-  <div id="taskList"></div>
- </div>
+  <div class="item">
+   <div class="row"><b>⚡ Бустер x2</b><b>200 000 COINS</b></div>
+   <button onclick="buyBoost(2,200000)">КУПИТИ</button>
+  </div>
+
+  <div class="item">
+   <div class="row"><b>🔥 Бустер x5</b><b>500 000 COINS</b></div>
+   <button onclick="buyBoost(5,500000)">КУПИТИ</button>
+  </div>
+
+  <div class="item">
+   <div class="row"><b>💎 Бустер x10</b><b>1 000 000 COINS</b></div>
+   <button onclick="buyBoost(10,1000000)">КУПИТИ</button>
+  </div>
+
+  <div class="item">
+   <div class="row"><b>🌟 Бустер x50</b><b>700 000 000 COINS</b></div>
+   <button onclick="buyBoost(50,700000000)">КУПИТИ</button>
+  </div>
+
+  <div class="item">
+   <div class="row"><b>👑 Бустер x100</b><b>1 500 000 000 COINS</b></div>
+   <button onclick="buyBoost(100,1500000000)">КУПИТИ</button>
+  </div>
+</div>
 </section>
 
 <section id="achievements" class="screen">
@@ -226,7 +231,7 @@ input{width:100%;margin:10px 0}
   <h3>🏆 ТОП-10 гравців</h3>
   <div id="globalLeaderboard">
    Завантаження рейтингу...
-<button onclick="document.getElementById('globalLeaderboard').textContent='КНОПКА ПРАЦЮЄ'">ПЕРЕВІРИТИ КНОПКУ</button>button>
+<button onclick="document.getElementById('globalLeaderboard').textContent='КНОПКА ПРАЦЮЄ'">ПЕРЕВІРИТИ КНОПКУ</button>
  </div>
 
  <p class="note">Результати змагання оновлюються через сервер SIDII.</p>
