@@ -166,7 +166,14 @@ input{width:100%;margin:10px 0}
    <span id="tapUpgradeLevel">Рівень 1</span>
    <span class="stat" id="tapUpgradePrice">100 COINS</span>
   </div>
-  <button onclick="upgradeTap()" class="action" id="tapUpgradeButton">ПОКРАЩИТИ</button>
+
+  <button onclick="upgradeTap()" class="action" id="tapUpgradeButton">
+   ПОКРАЩИТИ +1
+  </button>
+
+  <button onclick="upgradeTapMax()" class="action">
+   ⚡ ПРОКАЧАТИ НА ВСІ COINS
+  </button>
  </div>
 
  <div class="card">
@@ -180,7 +187,7 @@ input{width:100%;margin:10px 0}
   <button onclick="upgradeEnergy()" class="action" id="energyUpgradeButton">ПОКРАЩИТИ</button>
  </div>
 
-<div class="card">
+ <div class="card">
   <h3>🚀 Бустери</h3>
   <p class="muted">Тимчасово збільшують нагороду за натискання. Тривалість — 60 секунд.</p>
 
@@ -208,7 +215,7 @@ input{width:100%;margin:10px 0}
    <div class="row"><b>👑 Бустер x100</b><b>1 500 000 000 COINS</b></div>
    <button onclick="buyBoost(100,1500000000)">КУПИТИ</button>
   </div>
-</div>
+ </div>
 </section>
 
 <section id="achievements" class="screen">
