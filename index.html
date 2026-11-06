@@ -702,9 +702,12 @@ function exchangeCoins(){
  }
 
  game.coins-=amount;
- game.sidiiUnits+=amount*10;
+game.sidiiUnits+=amount/10000000;
 
- render();
+game.totalSidiEarned=(game.totalSidiEarned||0)+amount/10000000;
+
+checkAchievements();
+render();
 
  document.getElementById('exchangeAmount').value='';
  updatePreview();
