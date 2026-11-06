@@ -572,9 +572,9 @@ document.getElementById('tapCoin').addEventListener('click',()=>{
  const earned=game.power*multiplier();
 
  game.coins+=earned;
-  game.totalMiningClaims=(game.totalMiningClaims||0)+1;
+  game.totalTaps=(game.totalTaps||0)+1;
+game.totalEarned+=earned;
 checkAchievements();
- game.totalEarned+=earned;
  
 
  game.energy=Math.max(0,game.energy-1);
