@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SIDII</title>
 <style>
+ <script src="https://telegram.org/js/telegram-web-app.js"></script>
 *{box-sizing:border-box}
 body{margin:0;background:#090d18;color:white;font-family:Arial,sans-serif;min-height:100vh}
 header{padding:18px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #273047}
@@ -239,6 +240,53 @@ input{width:100%;margin:10px 0}
 </nav>
 
 <script>
+ const SIDII_API = 'https://qlnxmjtmbwjiksxseqal.supabase.co/functions/v1/sidii-api';
+
+async function loadLeaderboard(){
+ const box=document.getElementById('globalLeaderboard');
+ if(!box)return;
+
+ const tg=window.Telegram?.WebApp;
+ if(!tg || !tg.initData){
+  box.textContent='Відкрий SIDII через Telegram, щоб побачити рейтинг.';
+  return;
+ }
+
+ box.textContent='Завантаження...';
+
+ try{
+  const response=await fetch(SIDII_API,{
+   method:'POST',
+   headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({
+    action:'leaderboard',
+    initData:tg.initData
+   })
+  });
+
+  const data=await response.json();
+
+  if(!data.success)throw new Error(data.error||'Помилка');
+
+  box.innerHTML='';
+
+  if(!data.leaderboard || data.leaderboard.length===0){
+   box.textContent='Поки що гравців у рейтингу немає.';
+   return;
+  }
+
+  data.leaderboard.forEach(player=>{
+   const item=document.createElement('div');
+   item.className='item';
+   item.textContent=player.place+'. '+player.username+' — '+player.score+' COINS';
+   box.appendChild(item);
+  });
+
+ }catch(error){
+  box.textContent='Не вдалося завантажити рейтинг. Спробуй пізніше.';
+  console.error(error);
+ }
+}
 const KEY='sidii_game_v1';
 
 const defaults={ dailyStreakDay:0,
