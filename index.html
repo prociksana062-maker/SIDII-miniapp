@@ -630,28 +630,26 @@ function upgradeTap(){
  notify(t('upgrade'),'👆');
 }
 
-function energyUpgradePrice(){
- return Math.floor(500*Math.pow(game.energyLevel+1,1.35));
-}
+function upgradeTapMax(){
+ let bought=0;
 
-function upgradeEnergy(){
- if(game.energyLevel>=100){
-  notify(t('maxLevel'),'⚡');
-  return;
+ while(game.coins>=100*game.tapLevel){
+  const price=100*game.tapLevel;
+
+  game.coins-=price;
+  game.tapLevel++;
+  game.power++;
+  bought++;
  }
 
- const price=energyUpgradePrice();
-
- if(game.coins<price){
+ if(bought===0){
   notify(t('notEnough'),'❌');
   return;
  }
 
- game.coins-=price;
- game.energyLevel++;
-
  render();
- notify(t('energyUpgrade'),'⚡',energySpeed()+' енергії за секунду');
+ notify('Прокачано '+bought+' рівнів!','⚡',
+  'Сила тапу: '+game.power);
 }
 
 function buyBoost(mult,price){
