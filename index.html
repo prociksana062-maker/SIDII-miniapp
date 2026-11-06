@@ -208,12 +208,22 @@ input{width:100%;margin:10px 0}
 </section>
 
 <section id="rating" class="screen">
- <h2>🏆 Рейтинг</h2>
+ <h2>🏆 Глобальний рейтинг SIDII</h2>
+
  <div class="card">
-  <div class="big">Твій результат</div>
+  <div class="big">Твій баланс</div>
   <p id="ratingCoins">0 COINS</p>
-  <p class="note">Поки що це особистий результат на цьому пристрої. Глобальний рейтинг потребує сервера.</p>
  </div>
+
+ <div class="card">
+  <h3>🏆 ТОП-10 гравців</h3>
+  <div id="globalLeaderboard">
+   Завантаження рейтингу...
+  </div>
+  <button onclick="loadLeaderboard()">ОНОВИТИ РЕЙТИНГ</button>
+ </div>
+
+ <p class="note">Результати змагання оновлюються через сервер SIDII.</p>
 </section>
 
 </main>
