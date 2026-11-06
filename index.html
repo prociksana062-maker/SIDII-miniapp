@@ -876,40 +876,140 @@ item.appendChild(button);
 
 container.appendChild(item);
 });
-}function checkAchievements(){
- const list=[
-  {id:'tap100',title:'100 натискань',goal:100,value:game.totalTaps},
-  {id:'tap1000',title:'1000 натискань',goal:1000,value:game.totalTaps},
-  {id:'earn10000',title:'Заробити 10 000 COINS',goal:10000,value:game.totalEarned}
- ];
 
- list.forEach(a=>{
-  if(a.value>=a.goal&&!game.achievements.includes(a.id)){
+const achievementDefs = [
+ {id:'tap1',title:'Перше натискання',goal:1,reward:100,key:'totalTaps'},
+ {id:'tap100',title:'100 натискань',goal:100,reward:500,key:'totalTaps'},
+ {id:'tap1000',title:'1 000 натискань',goal:1000,reward:2000,key:'totalTaps'},
+ {id:'tap5000',title:'5 000 натискань',goal:5000,reward:5000,key:'totalTaps'},
+ {id:'tap10000',title:'10 000 натискань',goal:10000,reward:10000,key:'totalTaps'},
+ {id:'tap50000',title:'50 000 натискань',goal:50000,reward:30000,key:'totalTaps'},
+ {id:'tap100000',title:'100 000 натискань',goal:100000,reward:50000,key:'totalTaps'},
+
+ {id:'earn1000',title:'Заробити 1 000 COINS',goal:1000,reward:300,key:'totalEarned'},
+ {id:'earn10000',title:'Заробити 10 000 COINS',goal:10000,reward:2000,key:'totalEarned'},
+ {id:'earn100000',title:'Заробити 100 000 COINS',goal:100000,reward:10000,key:'totalEarned'},
+ {id:'earn1000000',title:'Заробити 1 000 000 COINS',goal:1000000,reward:50000,key:'totalEarned'},
+ {id:'earn10000000',title:'Заробити 10 000 000 COINS',goal:10000000,reward:200000,key:'totalEarned'},
+
+ {id:'mine1',title:'Перший збір майнінгу',goal:1,reward:3000,key:'totalMiningClaims'},
+ {id:'mine10',title:'Майнінг рівня 10',goal:10,reward:10000,key:'miningLevel'},
+ {id:'mine25',title:'Майнінг рівня 25',goal:25,reward:30000,key:'miningLevel'},
+ {id:'mine50',title:'Майнінг рівня 50',goal:50,reward:75000,key:'miningLevel'},
+
+ {id:'power10',title:'Сила тапу 10',goal:10,reward:5000,key:'power'},
+ {id:'power50',title:'Сила тапу 50',goal:50,reward:25000,key:'power'},
+ {id:'energy10',title:'Енергія рівня 10',goal:10,reward:10000,key:'energyLevel'},
+ {id:'energy100',title:'Енергія рівня 100',goal:100,reward:100000,key:'energyLevel'},
+
+ {id:'sidi10',title:'Заробити 10 SIDII',goal:10,reward:1000,key:'totalSidiEarned'},
+ {id:'sidi100',title:'Заробити 100 SIDII',goal:100,reward:5000,key:'totalSidiEarned'},
+ {id:'sidi500',title:'Заробити 500 SIDII',goal:500,reward:20000,key:'totalSidiEarned'},
+ {id:'sidi1000',title:'Заробити 1 000 SIDII',goal:1000,reward:50000,key:'totalSidiEarned'},
+ {id:'sidi10000',title:'Заробити 10 000 SIDII',goal:10000,reward:250000,key:'totalSidiEarned'}
+];
+
+function checkAchievements(){
+ if(!Array.isArray(game.achievements)) game.achievements=[];
+ if(!Array.isArray(game.claimedAchievements)) game.claimedAchievements=[];
+
+ let changed=false;
+
+ achievementDefs.forEach(a=>{
+  const value=Number(game[a.key])||0;
+
+  if(value>=a.goal&&!game.achievements.includes(a.id)){
    game.achievements.push(a.id);
+   changed=true;
    notify('Нове досягнення: '+a.title,'🏆');
   }
  });
+
+ if(changed&&typeof save==='function') save();
+}
+
+function claimAchievement(id){
+ checkAchievements();
+
+ const a=achievementDefs.find(x=>x.id===id);
+ if(!a)return;
+
+ if(!game.achievements.includes(id)){
+  notify('Досягнення ще не виконане!','❌');
+  return;
+ }
+
+ if(game.claimedAchievements.includes(id)){
+  notify('Нагороду вже отримано!','❌');
+  return;
+ }
+
+ game.coins+=a.reward;
+ game.claimedAchievements.push(id);
+
+ if(typeof save==='function')save();
+
+ render();
+ renderAchievements();
+
+ notify('+'+a.reward.toLocaleString('uk-UA')+' COINS','🏆','Нагорода за досягнення!');
 }
 
 function renderAchievements(){
  const container=document.getElementById('achievementList');
  if(!container)return;
 
+ checkAchievements();
+
  container.innerHTML='';
 
- const list=[
-  {id:'tap100',title:'100 натискань'},
-  {id:'tap1000',title:'1000 натискань'},
-  {id:'earn10000',title:'Заробити 10 000 COINS'}
- ];
+ achievementDefs.forEach(a=>{
+  const value=Math.max(0,Number(game[a.key])||0);
+  const progress=Math.min(100,value/a.goal*100);
+  const unlocked=game.achievements.includes(a.id);
+  const claimed=game.claimedAchievements.includes(a.id);
 
- list.forEach(a=>{
   const item=document.createElement('div');
   item.className='item';
-  item.textContent=(game.achievements.includes(a.id)?'🏆 ':'🔒 ')+a.title;
+
+  const title=document.createElement('b');
+  title.textContent=(claimed?'✅ ':unlocked?'🏆 ':'🔒 ')+a.title;
+
+  const info=document.createElement('p');
+  info.textContent=
+   Math.min(value,a.goal).toLocaleString('uk-UA')+
+   ' / '+a.goal.toLocaleString('uk-UA')+
+   ' · Нагорода: '+a.reward.toLocaleString('uk-UA')+' COINS';
+
+  const bar=document.createElement('div');
+  bar.style.cssText='height:8px;background:#333;border-radius:10px;overflow:hidden;margin:8px 0';
+
+  const fill=document.createElement('div');
+  fill.style.cssText='height:100%;background:#00e5ff;width:'+progress+'%;border-radius:10px';
+  bar.appendChild(fill);
+
+  item.appendChild(title);
+  item.appendChild(info);
+  item.appendChild(bar);
+
+  const button=document.createElement('button');
+
+  if(claimed){
+   button.textContent='ОТРИМАНО';
+   button.disabled=true;
+  }else if(unlocked){
+   button.textContent='ЗАБРАТИ '+a.reward.toLocaleString('uk-UA')+' COINS';
+   button.onclick=()=>claimAchievement(a.id);
+  }else{
+   button.textContent='ЩЕ НЕ ВИКОНАНО';
+   button.disabled=true;
+  }
+
+  item.appendChild(button);
   container.appendChild(item);
  });
 }
+
 
 function changeLanguage(lang){
  game.lang=lang;
