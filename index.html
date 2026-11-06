@@ -624,11 +624,13 @@ function claimMining(){
  }
 
  game.coins+=earned;
+ game.totalMiningClaims=(game.totalMiningClaims||0)+1;
  game.totalEarned+=earned;
  game.miningTime=Date.now();
 
  game.taskProgress.mining=(game.taskProgress.mining||0)+1;
 
+ checkAchievements();
  render();
  notify('+'+fmt(earned)+' COINS','💰');
 }
