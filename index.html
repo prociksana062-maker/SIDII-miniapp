@@ -571,19 +571,22 @@ document.getElementById('tapCoin').addEventListener('click',()=>{
 
  const earned=game.power*multiplier();
 
- game.coins+=earned;
-  game.totalTaps=(game.totalTaps||0)+1;
-game.totalEarned+=earned;
-checkAchievements();
- 
+ game.coins=(Number(game.coins)||0)+earned;
+ game.totalTaps=(Number(game.totalTaps)||0)+1;
+ game.totalEarned=(Number(game.totalEarned)||0)+earned;
 
  game.energy=Math.max(0,game.energy-1);
+
+ if(!game.taskProgress){
+  game.taskProgress={taps:0,many:0,mining:0};
+ }
 
  game.taskProgress.taps=(game.taskProgress.taps||0)+1;
  game.taskProgress.many=(game.taskProgress.many||0)+1;
 
  checkAchievements();
  render();
+ save();
 });
 
 function buyMining(){
