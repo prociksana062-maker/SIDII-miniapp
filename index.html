@@ -549,7 +549,8 @@ function showScreen(id,button){
 
  screen.classList.add('active');
 
- document.querySelectorAll('.nav button').forEach(x=>{
+ document.getElementById('tapCoin').addEventListener('click',()=>{
+ alert('НАТИСКАННЯ ПРАЦЮЄ');
   x.classList.remove('active');
  });
 
