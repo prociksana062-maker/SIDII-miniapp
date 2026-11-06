@@ -536,11 +536,18 @@ function render(){
 }
 
 function showScreen(id,button){
+ const screen=document.getElementById(id);
+
+ if(!screen){
+  notify('Екран не знайдено: '+id,'❌');
+  return;
+ }
+
  document.querySelectorAll('.screen').forEach(x=>{
   x.classList.remove('active');
  });
 
- document.getElementById(id).classList.add('active');
+ screen.classList.add('active');
 
  document.querySelectorAll('.nav button').forEach(x=>{
   x.classList.remove('active');
@@ -549,6 +556,9 @@ function showScreen(id,button){
  if(button)button.classList.add('active');
 
  render();
+
+ if(id==='tasks')renderTasks();
+ if(id==='achievements')renderAchievements();
 }
 
 document.getElementById('tapCoin').addEventListener('click',()=>{
