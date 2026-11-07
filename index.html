@@ -449,7 +449,9 @@ function boostActive(){
 function multiplier(){
  return boostActive()?game.boostMultiplier:1;
 }
-
+function energyUpgradePrice(){
+ return Math.floor(500*Math.pow((Number(game.energyLevel)||0)+1,1.35));
+}
 function render(){
  updateEnergy();
 
