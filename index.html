@@ -256,7 +256,7 @@ input{width:100%;margin:10px 0}
  <button onclick="showScreen('rating',this)"><span>🏆</span>Рейтинг</button>
 </nav>
 
-<script>
+<script>tapCoin 
   alert('JAVASCRIPT ЗАПУСТИВСЯ');
  const SIDII_API = 'https://qlnxmjtmbwjiksxseqal.supabase.co/functions/v1/sidii-api';
 
@@ -550,8 +550,7 @@ function showScreen(id,button){
 
  screen.classList.add('active');
 
- document.getElementById('tapCoin').addEventListener('click',()=>{
- alert('НАТИСКАННЯ ПРАЦЮЄ');
+ document.querySelectorAll('.nav button').forEach(x=>{
   x.classList.remove('active');
  });
 
