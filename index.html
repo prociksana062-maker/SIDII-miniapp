@@ -333,6 +333,8 @@ game.energyLevel=Number(game.energyLevel)||0;
 game.totalTaps=Number(game.totalTaps)||0;
 game.totalEarned=Number(game.totalEarned)||0;
 game.coins=Math.max(0,Number(game.coins)||0);
+const testSaved=JSON.parse(localStorage.getItem(KEY)||'null');
+alert(testSaved?'ЗАПИС Є. COINS: '+testSaved.coins:'ЗАПИСУ НЕМАЄ');
 game.energy=Number(game.energy);
 if(!Number.isFinite(game.energy))game.energy=100;
 
