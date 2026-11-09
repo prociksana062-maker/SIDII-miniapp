@@ -77,7 +77,18 @@ input{width:100%;margin:9px 0}.note{font-size:12px;color:#91a0b9;line-height:1.5
   <div id="rouletteResult" class="big"></div>
  </div>
 </section>
-
+<section id="mining" class="screen">
+ <h2>⛏️ AFK MINING</h2>
+ <div class="card">
+  <div class="muted">Статус майнінгу</div>
+  <div class="big" id="miningLevel">Не куплено</div>
+  <p class="muted" id="miningRate">Дохід: 0 COINS / год</p>
+  <p id="miningEarn">Накопичено: 0 COINS</p>
+  <button id="buyMining" onclick="buyMining()">КУПИТИ МАЙНІНГ · 5 000 COINS</button>
+  <button id="upgradeMining" class="btn2 action" onclick="upgradeMining()" style="display:none">ПРОКАЧАТИ</button>
+  <button id="claimMining" class="action" onclick="claimMining()" style="display:none">ЗАБРАТИ COINS</button>
+ </div>
+</section>
 <section id="shop" class="screen">
  <h2>🛒 Магазин покращень</h2>
  <div class="card">
