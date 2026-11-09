@@ -56,19 +56,25 @@ input{width:100%;margin:9px 0}.note{font-size:12px;color:#91a0b9;line-height:1.5
  <div class="card"><div class="row"><b>🏆 Твій ранг</b><b class="rank" id="homeRank">🥉 Бронза</b></div><div class="muted" id="homeCups">0 / 1 000 кубків</div></div>
 </section>
 
-<section id="mining" class="screen"><h2>⛏️ AFK MINING</h2><div class="card"><div class="muted">Статус майнінгу</div><div class="big" id="miningLevel">Не куплено</div><p class="muted" id="miningRate">Дохід: 0 COINS / год</p><p id="miningEarn">Накопичено: 0 COINS</p><button id="buyMining" onclick="buyMining()">КУПИТИ МАЙНІНГ · 5 000 COINS</button><button id="upgradeMining" class="btn2 action" onclick="upgradeMining()" style="display:none">ПРОКАЧАТИ</button><button id="claimMining" class="action" onclick="claimMining()" style="display:none">ЗАБРАТИ COINS</button></div><div class="card"><b>Як працює AFK Mining?</b><p class="note">Купи майнінг. Він накопичуватиме COINS, навіть коли тебе немає в грі. Максимальний час накопичення — 8 годин.</p></div></section>
-<section id="exchange" class="screen">
- <h2>💱 Обмін SIDII</h2>
+<section id="roulette" class="screen">
+ <h2>🎰 РУЛЕТКА SIDII</h2>
+
  <div class="card">
-  <div class="muted">Твій баланс COINS</div>
-  <div class="big" id="exchangeCoins">0</div>
-  <div class="muted">Курс: 1000 COINS = 0.00010 SIDII</div>
-  <input id="exchangeAmount" type="number" min="1000" step="1000" placeholder="Введи кількість COINS">
-  <button class="action" onclick="exchangeCoins()">ОБМІНЯТИ</button>
- </div>
- <div class="card">
-  <div class="muted">Твій баланс SIDII</div>
-  <div class="big" id="exchangeSidii">0.00000000</div>
+  <div class="big">🎰 РУЛЕТКА</div>
+  <p class="muted">Випробуй удачу та отримай нагороду!</p>
+
+  <div id="rouletteWheel" class="roulette-wheel">
+   <div class="roulette-prize">100K</div>
+   <div class="roulette-prize">200K</div>
+   <div class="roulette-prize">450K</div>
+   <div class="roulette-prize">×10</div>
+   <div class="roulette-prize">×15</div>
+   <div class="roulette-prize">×35</div>
+  </div>
+
+  <p>Вартість обертання: <b>150 000 COINS</b></p>
+  <button class="action" onclick="spinRoulette()">🎰 КРУТИТИ</button>
+  <div id="rouletteResult" class="big"></div>
  </div>
 </section>
 
