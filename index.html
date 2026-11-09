@@ -466,6 +466,47 @@ function equipSkin(id){
  notify('Скін вибрано','🎨',currentSkin().name);
  saveGame();render();
 }
+function spinRoulette(){
+ const cost=150000;
+
+ if(game.coins<cost){
+  notify('Недостатньо COINS','❌');
+  return;
+ }
+
+ game.coins-=cost;
+
+ const rewards=[
+  {name:'100 COINS',chance:50,value:100},
+  {name:'500 COINS',chance:25,value:500},
+  {name:'1000 COINS',chance:15,value:1000},
+  {name:'5000 COINS',chance:7,value:5000},
+  {name:'25000 COINS',chance:2,value:25000},
+  {name:'100000 COINS',chance:1,value:100000}
+ ];
+
+ let random=Math.random()*100;
+ let result=null;
+
+ for(const reward of rewards){
+  random-=reward.chance;
+  if(random<0){
+   result=reward;
+   break;
+  }
+ }
+
+ game.coins+=result.value;
+ game.rouletteSpins=(game.rouletteSpins||0)+1;
+ game.rouletteWins.push({
+  name:result.name,
+  date:Date.now()
+ });
+
+ saveGame();
+ render();
+ notify('Виграш: '+result.name,'🎰');
+}
 function renderSkins(){
  const list=document.getElementById('skinList');
  list.innerHTML='';
