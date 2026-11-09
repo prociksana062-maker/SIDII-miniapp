@@ -434,7 +434,6 @@ function renderSkins(){
   <button ${selected?'disabled':''} onclick="${owned?`equipSkin('${s.id}')`:`buySkin('${s.id}')`}">${selected?'ОБРАНО':owned?'ОБРАТИ':'КУПИТИ'}</button>`;
   list.appendChild(item);
  });
-}
 function renderBoosters(){
  const list=document.getElementById('boostList');
  list.innerHTML='';
