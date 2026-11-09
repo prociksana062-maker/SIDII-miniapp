@@ -224,8 +224,6 @@ function loadGame(){
  try{
   const saved=JSON.parse(localStorage.getItem(KEY)||'null');
   if(saved&&typeof saved==='object')game={...game,...saved};
-  game.energyLevel=0;
-saveGame();
  }catch(e){}
  game.coins=Math.max(0,Number(game.coins)||0);
  game.sidiiUnits=Math.max(0,Number(game.sidiiUnits)||0);
