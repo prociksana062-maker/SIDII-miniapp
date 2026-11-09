@@ -1,1 +1,565 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIDII</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*{box-sizing:border-box}
+html,body{width:100%;max-width:100%;margin:0;overflow-x:hidden}
+body{background:#090d18;color:white;font-family:Arial,sans-serif;min-height:100vh}
+header{padding:16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #273047}
+.logo{font-size:27px;font-weight:900;color:#f5c542;letter-spacing:3px}
+select,input{background:#182238;color:white;border:1px solid #34415d;padding:10px;border-radius:10px}
+main{width:100%;min-height:calc(100vh - 70px);padding:16px 14px 110px}
+.screen{display:none}.screen.active{display:block}
+.card{background:linear-gradient(145deg,#19243a,#101827);border:1px solid #293650;border-radius:18px;padding:16px;margin-bottom:14px}
+h2{font-size:21px;margin:5px 0 16px}h3{margin:8px 0}
+.muted,.small{color:#9ba9c2;font-size:13px}
+.balance{text-align:center;font-size:35px;font-weight:bold;color:#f5c542}
+.coin{width:190px;height:190px;border-radius:50%;margin:24px auto;display:flex;align-items:center;justify-content:center;border:8px solid var(--coin-border,#ffdc68);background:var(--coin-bg,radial-gradient(circle at 35% 30%,#ffe78b,#e9a91c 55%,#855000));box-shadow:0 0 35px var(--coin-glow,#d99b2c55),inset 0 0 20px #fff7;color:var(--coin-text,#553400);font-size:36px;font-weight:900;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;transition:transform .08s;touch-action:manipulation}
+.coin:active{transform:scale(.94)}
+.bar{height:12px;background:#303c53;border-radius:20px;overflow:hidden;margin:10px 0}
+.fill{height:100%;width:100%;background:linear-gradient(90deg,#23d5a0,#a5ef71);transition:width .2s}
+button{border:0;border-radius:12px;padding:12px;background:#f1b92d;color:#17120a;font-weight:bold;font-size:13px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:transform .08s,filter .15s}
+button:active{transform:scale(.97);filter:brightness(.92)}
+button:focus{outline:none}button:focus-visible{outline:2px solid #f5c542;outline-offset:3px}
+button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn2{background:#263650;color:white}.action{width:100%;margin-top:10px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.stat,.big{font-size:24px;font-weight:bold;color:#f5c542}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#101827;border-top:1px solid #293650;display:flex;justify-content:space-around;padding:8px 2px calc(8px + env(safe-area-inset-bottom));z-index:10}
+.nav button{flex:1;min-width:0;padding:8px 1px;background:transparent;color:#9ba9c2;font-size:9px;border-radius:8px;white-space:nowrap}
+.nav button.active{color:#f5c542;background:#202d42}.nav span{display:block;font-size:17px;margin-bottom:3px}
+input{width:100%;margin:9px 0}.note{font-size:12px;color:#91a0b9;line-height:1.5}
+.item{background:#111c2e;border:1px solid #34415d;border-radius:13px;padding:13px;margin-top:11px}
+.item button{margin-top:9px;width:100%}.toast{position:fixed;top:15px;left:50%;transform:translate(-50%,-130px);opacity:0;z-index:1000;width:calc(100% - 32px);max-width:390px;background:#152238;border:1px solid #e7b735;border-radius:14px;padding:13px 15px;box-shadow:0 8px 30px #0009;display:flex;align-items:center;gap:12px;transition:transform .25s,opacity .25s;pointer-events:none}
+.toast.show{transform:translate(-50%,0);opacity:1}.toast-icon{font-size:24px}.toast-title{font-weight:bold;color:#f5c542;margin-bottom:4px}.toast-message{font-size:12px;color:#c1cce0}
+.task-done{border-color:#23d5a0}.progress-text{font-size:12px;color:#9ba9c2}
+.skin-preview{height:74px;width:74px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:29px;border:4px solid var(--b);background:var(--g);color:var(--c);box-shadow:0 0 18px var(--glow);flex-shrink:0}
+.skin-row{display:flex;align-items:center;gap:12px}.skin-info{flex:1;min-width:0}.skin-info b{display:block;margin-bottom:5px}
+.rank{font-size:22px;font-weight:bold;color:#f5c542}.muted-line{color:#9ba9c2;font-size:12px}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"><div class="toast-icon" id="toastIcon">✅</div><div><div class="toast-title" id="toastTitle">SIDII</div><div class="toast-message" id="toastMessage"></div></div></div>
+<header><div class="logo">SIDII</div><select id="language" onchange="changeLanguage(this.value)"><option value="uk">🇺🇦 Українська</option><option value="ru">🇷🇺 Русский</option><option value="en">🇬🇧 English</option></select></header>
+<main>
+<section id="home" class="screen active">
+ <div class="card"><h2>🎁 Щоденний бонус</h2><div class="muted" id="dailyBonusInfo">Заходь щодня та отримуй нагороди!</div><div class="big" id="dailyBonusReward">1 000 COINS</div><button class="action" id="dailyBonusButton" onclick="claimDailyBonus()">ЗАБРАТИ БОНУС</button></div>
+ <div class="card"><div class="muted">ТВОЇ COINS</div><div class="balance" id="coins">0</div><div class="muted" style="text-align:center">COINS</div></div>
+ <div class="coin" id="tapCoin">SIDII</div>
+ <div class="card"><div class="row"><b>⚡ Енергія</b><b id="energyText">100 / 100</b></div><div class="bar"><div class="fill" id="energyBar"></div></div><div class="muted">Енергія відновлюється автоматично</div></div>
+ <div class="card row"><div><div class="muted">Сила натискання</div><div class="stat" id="power">+1</div></div><div><div class="muted">SIDII</div><div class="stat" id="sidii">0.00000000</div></div></div>
+ <div class="card"><div class="row"><b>⚡ Активний бустер</b><b class="stat" id="activeBoost">x1</b></div><div class="muted" id="boostTimer">Немає активного бустера</div><div class="muted" id="skinActiveLabel"></div></div>
+ <div class="card"><div class="row"><b>🏆 Твій ранг</b><b class="rank" id="homeRank">🥉 Бронза</b></div><div class="muted" id="homeCups">0 / 1 000 кубків</div></div>
+</section>
 
+<section id="mining" class="screen"><h2>⛏️ AFK MINING</h2><div class="card"><div class="muted">Статус майнінгу</div><div class="big" id="miningLevel">Не куплено</div><p class="muted" id="miningRate">Дохід: 0 COINS / год</p><p id="miningEarn">Накопичено: 0 COINS</p><button id="buyMining" onclick="buyMining()">КУПИТИ МАЙНІНГ · 5 000 COINS</button><button id="upgradeMining" class="btn2 action" onclick="upgradeMining()" style="display:none">ПРОКАЧАТИ</button><button id="claimMining" class="action" onclick="claimMining()" style="display:none">ЗАБРАТИ COINS</button></div><div class="card"><b>Як працює AFK Mining?</b><p class="note">Купи майнінг. Він накопичуватиме COINS, навіть коли тебе немає в грі. Максимальний час накопичення — 8 годин.</p></div></section>
+<section id="exchange" class="screen">
+ <h2>💱 Обмін SIDII</h2>
+ <div class="card">
+  <div class="muted">Твій баланс COINS</div>
+  <div class="big" id="exchangeCoins">0</div>
+  <div class="muted">Курс: 1000 COINS = 0.00010 SIDII</div>
+  <input id="exchangeAmount" type="number" min="1000" step="1000" placeholder="Введи кількість COINS">
+  <button class="action" onclick="exchangeCoins()">ОБМІНЯТИ</button>
+ </div>
+ <div class="card">
+  <div class="muted">Твій баланс SIDII</div>
+  <div class="big" id="exchangeSidii">0.00000000</div>
+ </div>
+</section>
+
+<section id="shop" class="screen">
+ <h2>🛒 Магазин покращень</h2>
+ <div class="card">
+  <div class="row"><b>💪 Сила натискання</b><b class="stat" id="powerLevel">Рівень 1</b></div>
+  <p class="muted">Збільшує кількість COINS за натискання.</p>
+  <div id="powerPrice" class="big">Ціна: 100 COINS</div>
+  <button class="action" onclick="upgradePower()">ПОКРАЩИТИ</button>
+ </div>
+ <div class="card">
+  <div class="row"><b>⚡ Відновлення енергії</b><b class="stat" id="energyLevel">Рівень 0/50</b></div>
+  <p class="muted">Збільшує швидкість відновлення енергії.</p>
+  <div id="energyPrice" class="big">Ціна: 500 COINS</div>
+  <button class="action" onclick="upgradeEnergy()">ПОКРАЩИТИ</button>
+ </div>
+ <div class="card">
+  <div class="row"><b>🍀 Удача</b><b class="stat" id="luckLevel">Рівень 0/50</b></div>
+  <p class="muted">Збільшує шанс отримати бонус ×10 до натискання.</p>
+  <div id="luckPrice" class="big">Ціна: 2 000 COINS</div>
+  <button class="action" onclick="upgradeLuck()">ПОКРАЩИТИ</button>
+ </div>
+ <div class="card">
+  <div class="row"><b>💥 Критичний тап</b><b class="stat" id="criticalLevel">Рівень 0/50</b></div>
+  <p class="muted">Збільшує шанс критичного натискання ×3.</p>
+  <div id="criticalPrice" class="big">Ціна: 2 500 COINS</div>
+  <button class="action" onclick="upgradeCritical()">ПОКРАЩИТИ</button>
+ </div>
+ <h2>🚀 Бустери</h2>
+ <div id="boostList"></div>
+</section>
+
+<section id="skins" class="screen">
+ <h2>🎨 Скіни монети</h2>
+ <div class="card">
+  <div class="muted">Обраний скін</div>
+  <div class="big" id="currentSkinName">Класична</div>
+  <p class="muted">Кожен скін збільшує кількість COINS за тап.</p>
+ </div>
+ <div id="skinList"></div>
+</section>
+
+<section id="rating" class="screen">
+ <h2>🏆 Рейтинг гравців</h2>
+ <div class="card">
+  <div class="muted">Твій ранг</div>
+  <div class="rank" id="rankName">Новачок</div>
+  <div class="big" id="cupsCount">0 🏆</div>
+  <div class="bar"><div class="fill" id="rankBar"></div></div>
+  <div class="muted" id="rankNext">До наступного рангу: 1 000 кубків</div>
+ </div>
+ <div class="card">
+  <h3>🌍 Глобальний рейтинг</h3>
+  <div id="leaderboard">Завантаження рейтингу...</div>
+  <button class="action btn2" onclick="loadLeaderboard()">ОНОВИТИ</button>
+ </div>
+</section>
+
+<section id="achievements" class="screen">
+ <h2>🏅 Досягнення</h2>
+ <div id="achievementList"></div>
+</section>
+</main>
+
+<nav class="nav">
+ <button class="active" onclick="showScreen('home',this)"><span>🏠</span>Головна</button>
+ <button onclick="showScreen('mining',this)"><span>⛏️</span>Майнінг</button>
+ <button onclick="showScreen('exchange',this)"><span>💱</span>Обмін</button>
+ <button onclick="showScreen('shop',this)"><span>🛒</span>Магазин</button>
+ <button onclick="showScreen('skins',this)"><span>🎨</span>Скіни</button>
+ <button onclick="showScreen('rating',this)"><span>🏆</span>Рейтинг</button>
+ <button onclick="showScreen('achievements',this)"><span>🏅</span>Нагороди</button>
+</nav>
+
+<script>
+const KEY='sidii_game_v1';
+const API='https://qlnxmjtmbwjiksxseqal.supabase.co/functions/v1/sidii-api';
+
+let game={
+ coins:0,
+ sidiiUnits:0,
+ energy:100,
+ maxEnergy:100,
+ power:1,
+ powerLevel:1,
+ energyLevel:0,
+ luckLevel:0,
+ criticalLevel:0,
+ miningLevel:0,
+ miningTime:Date.now(),
+ miningClaimed:0,
+ lastEnergy:Date.now(),
+ lastDaily:0,
+ dailyStreak:0,
+ booster:1,
+ boostUntil:0,
+ selectedSkin:'classic',
+ ownedSkins:['classic'],
+ cups:0,
+ cupTapRemainder:0,
+ totalTaps:0,
+ totalEarned:0,
+ totalMiningClaims:0,
+ achievements:[],
+ claimedAchievements:[]
+};
+
+let toastTimer=null;
+let currentLang='uk';
+   </script>
+   const skins=[
+ {id:'classic',name:'Класична',mult:1,price:0,emoji:'S',bg:'radial-gradient(circle at 35% 30%,#ffe78b,#e9a91c 55%,#855000)',border:'#ffdc68',color:'#553400',glow:'#d99b2c55'},
+ {id:'gold',name:'Золота',mult:2,price:50000,emoji:'👑',bg:'radial-gradient(circle,#fff5a0,#ffb700,#a65a00)',border:'#ffe36b',color:'#704000',glow:'#ffbd00aa'},
+ {id:'neon',name:'Неонова',mult:2.5,price:150000,emoji:'⚡',bg:'radial-gradient(circle,#ff66f2,#7b20ff,#190044)',border:'#ed62ff',color:'#fff',glow:'#d000ffaa'},
+ {id:'diamond',name:'Діамантова',mult:3,price:300000,emoji:'💎',bg:'radial-gradient(circle,#eaffff,#51dfff,#1260a8)',border:'#a6f4ff',color:'#075080',glow:'#40dfffaa'},
+ {id:'space',name:'Космічна',mult:3.5,price:600000,emoji:'🌌',bg:'radial-gradient(circle,#e7a5ff,#6120a5,#090b38)',border:'#bd8aff',color:'#fff',glow:'#8b3dffaa'},
+ {id:'fire',name:'Вогняна',mult:4,price:1000000,emoji:'🔥',bg:'radial-gradient(circle,#fff49a,#ff5b13,#8b0900)',border:'#ff9c43',color:'#fff',glow:'#ff4a00aa'},
+ {id:'ice',name:'Льодова',mult:4.5,price:1500000,emoji:'❄️',bg:'radial-gradient(circle,#fff,#7cecff,#1675bb)',border:'#baf7ff',color:'#075080',glow:'#50dcffaa'},
+ {id:'roblox',name:'Roblox',mult:5,price:2500000,emoji:'🟥',bg:'linear-gradient(135deg,#ff5555,#c90000)',border:'#ff9999',color:'#fff',glow:'#ff3333aa'},
+ {id:'brawl',name:'Brawl Stars',mult:5.5,price:4000000,emoji:'⭐',bg:'radial-gradient(circle,#ffe86b,#ed8a00,#9a2800)',border:'#ffdf55',color:'#713000',glow:'#ffb000aa'},
+ {id:'pubg',name:'PUBG',mult:6,price:6000000,emoji:'🎯',bg:'linear-gradient(135deg,#f0c36b,#7e5628,#34251a)',border:'#e4bd79',color:'#fff',glow:'#c28a42aa'},
+ {id:'minecraft',name:'Minecraft',mult:6.5,price:10000000,emoji:'⛏️',bg:'linear-gradient(135deg,#7bd44b,#398d2e,#24521d)',border:'#a4ed70',color:'#fff',glow:'#65d63aaa'}
+];
+
+const boosters=[
+ {mult:2,price:500000,duration:300},
+ {mult:5,price:2000000,duration:300},
+ {mult:10,price:5000000,duration:300}
+];
+
+const ranks=[
+ {cups:0,name:'Новачок',emoji:'🌱'},
+ {cups:1000,name:'Бронза',emoji:'🥉'},
+ {cups:10000,name:'Срібло',emoji:'🥈'},
+ {cups:25000,name:'Золото',emoji:'🥇'},
+ {cups:45000,name:'Діамант',emoji:'💎'},
+ {cups:70000,name:'Майстер',emoji:'👑'},
+ {cups:100000,name:'Легенда',emoji:'🔥'}
+];
+
+function formatNumber(n){
+ return Math.floor(Number(n)||0).toLocaleString('uk-UA');
+}
+function formatSidii(n){
+ return (Number(n)||0).toFixed(8);
+}
+function saveGame(){
+ try{localStorage.setItem(KEY,JSON.stringify(game));}catch(e){}
+}
+function loadGame(){
+ try{
+  const saved=JSON.parse(localStorage.getItem(KEY)||'null');
+  if(saved&&typeof saved==='object')game={...game,...saved};
+ }catch(e){}
+ game.coins=Math.max(0,Number(game.coins)||0);
+ game.sidiiUnits=Math.max(0,Number(game.sidiiUnits)||0);
+ game.energy=Math.max(0,Math.min(game.maxEnergy,Number(game.energy)||0));
+ game.ownedSkins=Array.isArray(game.ownedSkins)?game.ownedSkins:['classic'];
+ if(!game.ownedSkins.includes('classic'))game.ownedSkins.unshift('classic');
+ game.achievements=Array.isArray(game.achievements)?game.achievements:[];
+ game.claimedAchievements=Array.isArray(game.claimedAchievements)?game.claimedAchievements:[];
+}
+function notify(title,icon='✅',message=''){
+ const toast=document.getElementById('toast');
+ document.getElementById('toastIcon').textContent=icon;
+ document.getElementById('toastTitle').textContent=title;
+ document.getElementById('toastMessage').textContent=message;
+ toast.classList.add('show');
+ clearTimeout(toastTimer);
+ toastTimer=setTimeout(()=>toast.classList.remove('show'),2000);
+}
+function currentSkin(){
+ return skins.find(s=>s.id===game.selectedSkin)||skins[0];
+}
+function totalMultiplier(){
+ return currentSkin().mult*(Date.now()<game.boostUntil?game.booster:1);
+}
+function rankInfo(){
+ let rank=ranks[0];
+ for(const r of ranks)if(game.cups>=r.cups)rank=r;
+ let next=ranks.find(r=>r.cups>game.cups);
+ return {rank,next};
+}
+function showScreen(id,button){
+ document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+ document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
+ const screen=document.getElementById(id);
+ if(!screen){notify('Екран не знайдено','❌',id);return;}
+ screen.classList.add('active');
+ if(button)button.classList.add('active');
+ if(id==='rating')loadLeaderboard();
+ render();
+}
+function changeLanguage(lang){
+ currentLang=lang;
+ notify('Мову вибрано','🌐',lang.toUpperCase());
+}
+function addCupsForTap(){
+ game.cupTapRemainder++;
+ if(game.cupTapRemainder>=100){
+  const earned=Math.floor(game.cupTapRemainder/100);
+  game.cups+=earned;
+  game.cupTapRemainder%=100;
+ }
+}
+function tap(){
+ if(game.energy<1){notify('Немає енергії','⚡','Зачекай відновлення');return;}
+ game.energy-=1;
+ let amount=game.power;
+ let message='';
+ if(Math.random()<game.luckLevel*.02){
+  amount*=10;
+  message='🍀 Удача ×10!';
+ }
+ if(Math.random()<game.criticalLevel*.02){
+  amount*=3;
+  message='💥 Критичний тап ×3!';
+ }
+ amount=Math.floor(amount*totalMultiplier());
+ game.coins+=amount;
+ game.totalEarned+=amount;
+ game.totalTaps++;
+ addCupsForTap();
+ if(message)notify('Бонус!', '✨',message+' +'+formatNumber(amount)+' COINS');
+ saveGame();
+ render();
+}
+document.getElementById('tapCoin').addEventListener('click',tap);
+function claimDailyBonus(){
+ const today=new Date().toDateString();
+ if(game.lastDaily===today){notify('Бонус уже отримано','🎁');return;}
+ const reward=1000+game.dailyStreak*500;
+ game.coins+=reward;
+ game.dailyStreak=Math.min(7,game.dailyStreak+1);
+ game.lastDaily=today;
+ notify('Бонус отримано!','🎁','+'+formatNumber(reward)+' COINS');
+ saveGame();render();
+}
+
+function miningIncome(){
+ if(game.miningLevel<=0)return 0;
+ const elapsed=Math.min(8*60*60*1000,Date.now()-game.miningTime);
+ return Math.floor(elapsed/1000/3600*(game.miningLevel*1000));
+}
+function buyMining(){
+ if(game.miningLevel>0)return;
+ if(game.coins<5000){notify('Недостатньо COINS','❌');return;}
+ game.coins-=5000;
+ game.miningLevel=1;
+ game.miningTime=Date.now();
+ notify('Майнінг куплено','⛏️');
+ saveGame();render();
+}
+function upgradeMining(){
+ if(game.miningLevel<=0)return;
+ const price=Math.floor(5000*Math.pow(game.miningLevel+1,1.6));
+ if(game.coins<price){notify('Недостатньо COINS','❌');return;}
+ game.coins+=miningIncome();
+ game.coins-=price;
+ game.miningLevel++;
+ game.miningTime=Date.now();
+ notify('Майнінг покращено','⛏️','Рівень '+game.miningLevel);
+ saveGame();render();
+}
+function claimMining(){
+ const income=miningIncome();
+ if(income<=0){notify('Ще немає доходу','⏳');return;}
+ game.coins+=income;
+ game.totalMiningClaims+=income;
+ game.miningTime=Date.now();
+ notify('Майнінг зібрано','⛏️','+'+formatNumber(income)+' COINS');
+ saveGame();render();
+}
+
+function exchangeCoins(){
+ const input=document.getElementById('exchangeAmount');
+ const amount=Math.floor(Number(input.value));
+ if(!Number.isFinite(amount)||amount<1000){notify('Мінімум 1000 COINS','❌');return;}
+ if(amount>game.coins){notify('Недостатньо COINS','❌');return;}
+ game.coins-=amount;
+ game.sidiiUnits+=amount/1000*10000;
+ input.value='';
+ notify('Обмін успішний','💱','+'+formatSidii(game.sidiiUnits)+' SIDII');
+ saveGame();render();
+}
+function powerPrice(){
+ return Math.floor(100*Math.pow(game.powerLevel,1.5));
+}
+function upgradePower(){
+ const price=powerPrice();
+ if(game.coins<price){notify('Недостатньо COINS','❌');return;}
+ game.coins-=price;
+ game.powerLevel++;
+ game.power++;
+ notify('Сила збільшена','💪','Тепер +'+game.power+' за тап');
+ saveGame();render();
+}
+function upgradeEnergy(){
+ if(game.energyLevel>=50){notify('Досягнуто максимум','⚡');return;}
+ const price=Math.floor(500*Math.pow(game.energyLevel+1,1.45));
+ if(game.coins<price){notify('Недостатньо COINS','❌');return;}
+ game.coins-=price;
+ game.energyLevel++;
+ notify('Енергію покращено','⚡','Рівень '+game.energyLevel+'/50');
+ saveGame();render();
+}
+function upgradeLuck(){
+ if(game.luckLevel>=50){notify('Досягнуто максимум','🍀');return;}
+ const price=Math.floor(2000*Math.pow(game.luckLevel+1,1.45));
+ if(game.coins<price){notify('Недостатньо COINS','❌');return;}
+ game.coins-=price;game.luckLevel++;
+ notify('Удачу покращено','🍀','Шанс '+game.luckLevel*2+'%');
+ saveGame();render();
+}
+function upgradeCritical(){
+ if(game.criticalLevel>=50){notify('Досягнуто максимум','💥');return;}
+ const price=Math.floor(2500*Math.pow(game.criticalLevel+1,1.45));
+ if(game.coins<price){notify('Недостатньо COINS','❌');return;}
+ game.coins-=price;game.criticalLevel++;
+ notify('Критичний тап покращено','💥','Шанс '+game.criticalLevel*2+'%');
+ saveGame();render();
+}
+function buyBoost(mult){
+ const b=boosters.find(x=>x.mult===mult);
+ if(!b)return;
+ if(game.coins<b.price){notify('Недостатньо COINS','❌');return;}
+ game.coins-=b.price;
+ game.booster=b.mult;
+ game.boostUntil=Date.now()+b.duration*1000;
+ notify('Бустер активовано','🚀','×'+mult+' на 5 хвилин');
+ saveGame();render();
+}
+function buySkin(id){
+ const skin=skins.find(s=>s.id===id);
+ if(!skin)return;
+ if(game.ownedSkins.includes(id)){equipSkin(id);return;}
+ if(game.coins<skin.price){notify('Недостатньо COINS','❌');return;}
+ game.coins-=skin.price;
+ game.ownedSkins.push(id);
+ game.selectedSkin=id;
+ notify('Скін куплено','🎨',skin.name);
+ saveGame();render();
+}
+function equipSkin(id){
+ if(!game.ownedSkins.includes(id))return;
+ game.selectedSkin=id;
+ notify('Скін вибрано','🎨',currentSkin().name);
+ saveGame();render();
+}
+function renderSkins(){
+ const list=document.getElementById('skinList');
+ list.innerHTML='';
+ skins.forEach(s=>{
+  const owned=game.ownedSkins.includes(s.id);
+  const selected=game.selectedSkin===s.id;
+  const item=document.createElement('div');
+  item.className='item';
+  item.innerHTML=`<div class="skin-row">
+   <div class="skin-preview" style="--g:${s.bg};--b:${s.border};--c:${s.color};--glow:${s.glow}">${s.emoji}</div>
+   <div class="skin-info"><b>${s.name}</b><div class="muted">Множник ×${s.mult}</div><div class="muted">${owned?'Куплено':formatNumber(s.price)+' COINS'}</div></div>
+  </div>
+  <button ${selected?'disabled':''} onclick="${owned?`equipSkin('${s.id}')`:`buySkin('${s.id}')`}">${selected?'ОБРАНО':owned?'ОБРАТИ':'КУПИТИ'}</button>`;
+  list.appendChild(item);
+ });
+}
+function renderBoosters(){
+ const list=document.getElementById('boostList');
+ list.innerHTML='';
+ boosters.forEach(b=>{
+  const item=document.createElement('div');
+  item.className='item';
+  item.innerHTML=`<div class="row"><b>🚀 Бустер ×${b.mult}</b><b>${formatNumber(b.price)} COINS</b></div><div class="muted">Діє 5 хвилин</div><button onclick="buyBoost(${b.mult})">КУПИТИ</button>`;
+  list.appendChild(item);
+ });
+}
+const achievementData=[
+ {id:'tap100',name:'Перші 100 тапів',desc:'Зроби 100 натискань',goal:100,reward:1000,check:()=>game.totalTaps},
+ {id:'tap1000',name:'Тапер',desc:'Зроби 1000 натискань',goal:1000,reward:5000,check:()=>game.totalTaps},
+ {id:'coins10000',name:'Багатій',desc:'Зароби 10 000 COINS',goal:10000,reward:5000,check:()=>game.totalEarned},
+ {id:'coins100000',name:'Мільйонер',desc:'Зароби 100 000 COINS',goal:100000,reward:25000,check:()=>game.totalEarned},
+ {id:'mining',name:'Шахтар',desc:'Збери 10 000 COINS з майнінгу',goal:10000,reward:5000,check:()=>game.totalMiningClaims}
+];
+function claimAchievement(id){
+ const a=achievementData.find(x=>x.id===id);
+ if(!a||game.claimedAchievements.includes(id)||a.check()<a.goal)return;
+ game.claimedAchievements.push(id);
+ game.coins+=a.reward;
+ notify('Досягнення отримано','🏅','+'+formatNumber(a.reward)+' COINS');
+ saveGame();render();
+}
+function renderAchievements(){
+ const list=document.getElementById('achievementList');
+ list.innerHTML='';
+ achievementData.forEach(a=>{
+  const done=game.claimedAchievements.includes(a.id);
+  const progress=Math.min(a.goal,a.check());
+  const item=document.createElement('div');
+  item.className='item'+(done?' task-done':'');
+  item.innerHTML=`<div class="row"><b>${done?'✅':'🏅'} ${a.name}</b><b>+${formatNumber(a.reward)}</b></div>
+   <p class="muted">${a.desc}</p>
+   <div class="bar"><div class="fill" style="width:${progress/a.goal*100}%"></div></div>
+   <div class="progress-text">${formatNumber(progress)} / ${formatNumber(a.goal)}</div>
+   <button ${done||progress<a.goal?'disabled':''} onclick="claimAchievement('${a.id}')">${done?'ОТРИМАНО':'ЗАБРАТИ НАГОРОДУ'}</button>`;
+  list.appendChild(item);
+ });
+}
+async function loadLeaderboard(){
+ const box=document.getElementById('leaderboard');
+ box.textContent='Завантаження рейтингу...';
+ try{
+  const response=await fetch(API+'/leaderboard');
+  if(!response.ok)throw new Error('Помилка сервера');
+  const data=await response.json();
+  const rows=Array.isArray(data)?data:(data.players||[]);
+  if(!rows.length){box.textContent='Поки немає гравців';return;}
+  box.innerHTML='';
+  rows.slice(0,20).forEach((p,i)=>{
+   const row=document.createElement('div');
+   row.className='item row';
+   const name=document.createElement('b');
+   name.textContent=(i+1)+'. '+(p.username||p.name||'Гравець');
+   const score=document.createElement('span');
+   score.textContent=formatNumber(p.coins||0)+' COINS';
+   row.append(name,score);box.appendChild(row);
+  });
+ }catch(e){box.textContent='Рейтинг тимчасово недоступний';}
+}
+function render(){
+ const skin=currentSkin();
+ document.getElementById('coins').textContent=formatNumber(game.coins);
+ document.getElementById('energyText').textContent=formatNumber(game.energy)+' / '+formatNumber(game.maxEnergy);
+ document.getElementById('energyBar').style.width=(game.energy/game.maxEnergy*100)+'%';
+ document.getElementById('power').textContent='+'+game.power;
+ document.getElementById('sidii').textContent=formatSidii(game.sidiiUnits/100000000);
+ document.getElementById('exchangeCoins').textContent=formatNumber(game.coins);
+ document.getElementById('exchangeSidii').textContent=formatSidii(game.sidiiUnits/100000000);
+ document.getElementById('powerLevel').textContent='Рівень '+game.powerLevel;
+ document.getElementById('powerPrice').textContent='Ціна: '+formatNumber(powerPrice())+' COINS';
+ document.getElementById('energyLevel').textContent='Рівень '+game.energyLevel+'/50';
+ document.getElementById('energyPrice').textContent='Ціна: '+formatNumber(Math.floor(500*Math.pow(game.energyLevel+1,1.45)))+' COINS';
+ document.getElementById('luckLevel').textContent='Рівень '+game.luckLevel+'/50';
+ document.getElementById('luckPrice').textContent='Ціна: '+formatNumber(Math.floor(2000*Math.pow(game.luckLevel+1,1.45)))+' COINS';
+ document.getElementById('criticalLevel').textContent='Рівень '+game.criticalLevel+'/50';
+ document.getElementById('criticalPrice').textContent='Ціна: '+formatNumber(Math.floor(2500*Math.pow(game.criticalLevel+1,1.45)))+' COINS';
+ document.getElementById('activeBoost').textContent=Date.now()<game.boostUntil?'x'+game.booster:'x1';
+ document.getElementById('boostTimer').textContent=Date.now()<game.boostUntil?'Залишилось '+Math.ceil((game.boostUntil-Date.now())/1000)+' сек.':'Немає активного бустера';
+ document.getElementById('skinActiveLabel').textContent='Скін: '+skin.name+' ×'+skin.mult;
+ document.getElementById('tapCoin').style.setProperty('--coin-bg',skin.bg);
+ document.getElementById('tapCoin').style.setProperty('--coin-border',skin.border);
+ document.getElementById('tapCoin').style.setProperty('--coin-text',skin.color);
+ document.getElementById('tapCoin').style.setProperty('--coin-glow',skin.glow);
+ document.getElementById('tapCoin').textContent=skin.emoji;
+ document.getElementById('currentSkinName').textContent=skin.name+' ×'+skin.mult;
+ document.getElementById('miningLevel').textContent=game.miningLevel?'Рівень '+game.miningLevel:'Не куплено';
+ document.getElementById('miningRate').textContent='Дохід: '+formatNumber(game.miningLevel*1000)+' COINS / год';
+ document.getElementById('miningEarn').textContent='Накопичено: '+formatNumber(miningIncome())+' COINS';
+ document.getElementById('buyMining').style.display=game.miningLevel?'none':'block';
+ document.getElementById('upgradeMining').style.display=game.miningLevel?'block':'none';
+ document.getElementById('claimMining').style.display=game.miningLevel?'block':'none';
+ document.getElementById('upgradeMining').textContent='ПРОКАЧАТИ · '+formatNumber(Math.floor(5000*Math.pow(game.miningLevel+1,1.6)))+' COINS';
+ const dailyClaimed=game.lastDaily===new Date().toDateString();
+ document.getElementById('dailyBonusButton').disabled=dailyClaimed;
+ document.getElementById('dailyBonusButton').textContent=dailyClaimed?'БОНУС ОТРИМАНО':'ЗАБРАТИ БОНУС';
+ document.getElementById('dailyBonusReward').textContent=formatNumber(1000+game.dailyStreak*500)+' COINS';
+ const r=rankInfo();
+ document.getElementById('homeRank').textContent=r.rank.emoji+' '+r.rank.name;
+ document.getElementById('rankName').textContent=r.rank.emoji+' '+r.rank.name;
+ document.getElementById('homeCups').textContent=formatNumber(game.cups)+' кубків';
+ document.getElementById('cupsCount').textContent=formatNumber(game.cups)+' 🏆';
+ document.getElementById('rankNext').textContent=r.next?'До наступного рангу: '+formatNumber(r.next.cups-game.cups)+' кубків':'Максимальний ранг!';
+ document.getElementById('rankBar').style.width=r.next?Math.min(100,(game.cups-r.rank.cups)/(r.next.cups-r.rank.cups)*100)+'%':'100%';
+ renderSkins();renderBoosters();renderAchievements();
+}
+function recoverEnergy(){
+ const now=Date.now();
+ const elapsed=Math.max(0,now-(Number(game.lastEnergy)||now));
+ const rate=1+game.energyLevel;
+ game.energy=Math.min(game.maxEnergy,game.energy+elapsed/1000*rate);
+ game.lastEnergy=now;
+}
+function tick(){
+ recoverEnergy();
+ render();
+ saveGame();
+}
+loadGame();
+if(!game.lastEnergy)game.lastEnergy=Date.now();
+render();
+setInterval(tick,1000);
+window.addEventListener('beforeunload',saveGame);
+</script>
+</body>
+ </html> 
