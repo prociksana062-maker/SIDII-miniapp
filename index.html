@@ -154,7 +154,17 @@ input{width:100%;margin:9px 0}.note{font-size:12px;color:#91a0b9;line-height:1.5
   <div id="rouletteHistory">Виграшів поки немає</div>
  </div>
  </section>
-
+<section id="exchange" class="screen">
+ <h2>💱 Обмін COINS на SIDII</h2>
+ <div class="card">
+  <div class="muted">Твої COINS</div>
+  <div class="big" id="exchangeCoins">0</div>
+  <div class="muted">Твої SIDII</div>
+  <div class="big" id="exchangeSidii">0.00000000</div>
+  <input id="exchangeAmount" type="number" placeholder="Введи кількість COINS">
+  <button class="action" onclick="exchangeCoins()">ОБМІНЯТИ</button>
+ </div>
+</section>
 <section id="skins" class="screen">
  <h2>🎨 Скіни монети</h2>
  <div class="card">
