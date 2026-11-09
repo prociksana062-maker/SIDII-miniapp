@@ -271,13 +271,19 @@ function loadGame(){
   const saved=JSON.parse(localStorage.getItem(KEY)||'null');
   if(saved&&typeof saved==='object')game={...game,...saved};
  }catch(e){}
+
  game.coins=Math.max(0,Number(game.coins)||0);
  game.sidiiUnits=Math.max(0,Number(game.sidiiUnits)||0);
  game.energy=Math.max(0,Math.min(game.maxEnergy,Number(game.energy)||0));
+
  game.ownedSkins=Array.isArray(game.ownedSkins)?game.ownedSkins:['classic'];
  if(!game.ownedSkins.includes('classic'))game.ownedSkins.unshift('classic');
+
  game.achievements=Array.isArray(game.achievements)?game.achievements:[];
  game.claimedAchievements=Array.isArray(game.claimedAchievements)?game.claimedAchievements:[];
+
+ game.rouletteSpins=Math.max(0,Number(game.rouletteSpins)||0);
+ game.rouletteWins=Array.isArray(game.rouletteWins)?game.rouletteWins:[];
 }
 function notify(title,icon='✅',message=''){
  const toast=document.getElementById('toast');
