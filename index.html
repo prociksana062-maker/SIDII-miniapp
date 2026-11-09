@@ -360,12 +360,36 @@ function powerPrice(){
 }
 function upgradePower(){
  const price=powerPrice();
- if(game.coins<price){notify('Недостатньо COINS','❌');return;}
+ if(game.coins<price){
+  notify('Недостатньо COINS','❌');
+  return;
+ }
  game.coins-=price;
  game.powerLevel++;
  game.power++;
  notify('Сила збільшена','💪','Тепер +'+game.power+' за тап');
- saveGame();render();
+ saveGame();
+ render();
+}
+
+function upgradePowerAll(){
+ let bought=0;
+
+ while(game.coins>=powerPrice()){
+  game.coins-=powerPrice();
+  game.powerLevel++;
+  game.power++;
+  bought++;
+ }
+
+ if(bought===0){
+  notify('Недостатньо COINS','❌');
+  return;
+ }
+
+ notify('Прокачка завершена','💪','Куплено рівнів: '+bought);
+ saveGame();
+ render();
 }
 function upgradeEnergy(){
  if(game.energyLevel>=50){notify('Досягнуто максимум','⚡');return;}
