@@ -528,7 +528,26 @@ function spinRoulette(){
  }
 
  game.coins-=cost;
-
+if(Math.random()<0.01){
+ if(!game.ownedSkins.includes('roulette35')){
+  game.ownedSkins.push('roulette35');
+  game.rouletteSpins=(game.rouletteSpins||0)+1;
+  game.rouletteWins.push({
+   name:'Скін Рулеткова ×35',
+   date:Date.now()
+  });
+  saveGame();
+  render();
+  notify('ВИГРАШ!','🎰','Скін Рулеткова ×35 додано!');
+  return;
+ }else{
+  game.coins+=100000;
+  notify('Дублікат скіну','💰','+100000 COINS');
+  saveGame();
+  render();
+  return;
+ }
+}
  const rewards=[
   {name:'100 COINS',chance:50,value:100},
   {name:'500 COINS',chance:25,value:500},
