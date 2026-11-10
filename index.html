@@ -577,10 +577,18 @@ function renderSkins(){
 function renderBoosters(){
  const list=document.getElementById('boostList');
  list.innerHTML='';
+
  boosters.forEach(b=>{
   const item=document.createElement('div');
   item.className='item';
-  item.innerHTML=`<div class="row"><b>🚀 Бустер ×${b.mult}</b><b>${formatNumber(b.price)} COINS</b></div><div class="muted">Діє 5 хвилин</div><button onclick="buyBoost(${b.mult})">КУПИТИ</button>`;
+  item.innerHTML=`
+   <div class="row">
+    <b>🚀 Бустер ×${b.mult.toLocaleString('uk-UA')}</b>
+    <b>${formatNumber(b.price)} COINS</b>
+   </div>
+   <div class="muted">Діє 5 хвилин</div>
+   <button onclick="buyBoost(${b.mult})">КУПИТИ</button>
+  `;
   list.appendChild(item);
  });
 }
