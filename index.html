@@ -395,15 +395,56 @@ function add100BillionCoins(){
  render();
  notify('+100 МІЛЬЯРДІВ COINS 💰','✅');
 }
+
 function buyMining(){
  if(game.miningLevel>0)return;
- if(game.coins<5000){notify('Недостатньо COINS','❌');return;}
+ if(game.coins<5000){
+  notify('Недостатньо COINS','❌');
+  return;
+ }
+
  game.coins-=5000;
  game.miningLevel=1;
  game.miningTime=Date.now();
+
  notify('Майнінг куплено','⛏️');
- saveGame();render();
+ saveGame();
+ render();
 }
+
+function upgradeMiningMax(){
+ if(game.miningLevel<=0){
+  notify('Спочатку купи майнінг!','❌');
+  return;
+ }
+
+ game.coins += miningIncome();
+ game.miningTime=Date.now();
+
+ let bought=0;
+
+ while(bought<1000000){
+  const price=Math.floor(
+   5000*Math.pow(game.miningLevel+1,1.6)
+  );
+
+  if(!Number.isSafeInteger(price) || game.coins<price)break;
+
+  game.coins-=price;
+  game.miningLevel++;
+  bought++;
+ }
+
+ if(bought===0){
+  notify('Недостатньо COINS','❌');
+ }else{
+  notify('🚀 Прокачано рівнів: '+bought,'✅');
+ }
+
+ saveGame();
+ render();
+}
+
 function upgradeMining(){
  if(game.miningLevel<=0)return;
  const price=Math.floor(5000*Math.pow(game.miningLevel+1,1.6));
@@ -414,6 +455,31 @@ function upgradeMining(){
  game.miningTime=Date.now();
  notify('Майнінг покращено','⛏️','Рівень '+game.miningLevel);
  saveGame();render();
+}
+ 
+function upgradeMiningMax(){
+ if(game.miningLevel<=0)return;
+
+ game.coins+=miningIncome();
+ game.miningTime=Date.now();
+
+ let bought=0;
+
+ while(bought<1000000){
+  const price=Math.floor(
+   5000*Math.pow(game.miningLevel+1,1.6)
+  );
+
+  if(!Number.isSafeInteger(price)||game.coins<price)break;
+
+  game.coins-=price;
+  game.miningLevel++;
+  bought++;
+ }
+
+ notify('Прокачано рівнів: '+bought,'⛏️');
+ saveGame();
+ render();
 }
 function claimMining(){
  const income=miningIncome();
