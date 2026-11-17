@@ -413,28 +413,50 @@ function buyMining(){
  render();
 }
 
+
 function upgradeMiningMax(){
- if(game.miningLevel<=0){
+ if(Number(game.miningLevel)<=0){
   notify('Спочатку купи майнінг!','❌');
   return;
  }
 
- game.coins += miningIncome();
+ let level=Math.floor(Number(game.miningLevel));
+ let coins=Math.floor(Number(game.coins));
+ const income=Math.floor(Number(miningIncome())||0);
+
+ if(!Number.isSafeInteger(coins) ||
+    !Number.isSafeInteger(level)){
+  notify('Занадто великі числа для прокачування!','❌');
+  return;
+ }
+
+ coins+=income;
  game.miningTime=Date.now();
+
+ if(!Number.isSafeInteger(coins)){
+  notify('Занадто багато COINS для точного розрахунку!','❌');
+  game.coins-=income;
+  return;
+ }
 
  let bought=0;
 
- while(bought<1000000){
+ while(true){
   const price=Math.floor(
-   5000*Math.pow(game.miningLevel+1,1.6)
+   5000*Math.pow(level+1,1.6)
   );
 
-  if(!Number.isSafeInteger(price) || game.coins<price)break;
+  if(!Number.isSafeInteger(price) ||
+     price<=0 ||
+     coins<price) break;
 
-  game.coins-=price;
-  game.miningLevel++;
+  coins-=price;
+  level++;
   bought++;
  }
+
+ game.coins=coins;
+ game.miningLevel=level;
 
  if(bought===0){
   notify('Недостатньо COINS','❌');
