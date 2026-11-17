@@ -768,6 +768,7 @@ function render(){
  document.getElementById('miningEarn').textContent='Накопичено: '+formatNumber(miningIncome())+' COINS';
  document.getElementById('buyMining').style.display=game.miningLevel?'none':'block';
  document.getElementById('upgradeMining').style.display=game.miningLevel?'block':'none';
+ document.getElementById('upgradeMiningMax').style.display=game.miningLevel?'block':'none';
  document.getElementById('claimMining').style.display=game.miningLevel?'block':'none';
  document.getElementById('upgradeMining').textContent='ПРОКАЧАТИ · '+formatNumber(Math.floor(5000*Math.pow(game.miningLevel+1,1.6)))+' COINS';
  const dailyClaimed=game.lastDaily===new Date().toDateString();
