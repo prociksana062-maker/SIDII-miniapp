@@ -389,6 +389,12 @@ function miningIncome(){
  const elapsed=Math.min(8*60*60*1000,Date.now()-game.miningTime);
  return Math.floor(elapsed/1000/3600*(game.miningLevel*1000));
 }
+function add100BillionCoins(){
+ game.coins += 100000000000;
+ saveGame();
+ render();
+ notify('+100 МІЛЬЯРДІВ COINS 💰','✅');
+}
 function buyMining(){
  if(game.miningLevel>0)return;
  if(game.coins<5000){notify('Недостатньо COINS','❌');return;}
